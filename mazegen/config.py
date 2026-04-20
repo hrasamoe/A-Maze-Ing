@@ -12,10 +12,10 @@ class MazeProperty(BaseModel):
     exit: tuple[int, int]
     output_file: str = Field(default="maze_output.txt", min_length=2)
     perfect: bool = Field(default=True)
-    seed: int | None = Field(default=None)
+    seed: int = Field(default=78)
 
 
-class MazeFileParsing:
+class MazeConfig:
     def __init__(self, filepath: str) -> None:
         self.filepath: str = filepath
         raw_data = self.read_file(filepath)
@@ -60,8 +60,8 @@ class MazeFileParsing:
                     )
                 elif error_type in ["bool_type", "type_error.bool"]:
                     occured_error.append(
-                        f"[!] Invalid Format: '{field_name}' must be boolean type"
-                        "True or False"
+                        f"[!] Invalid Format: '{field_name}' must be"
+                        "boolean type True or False"
                     )
                 else:
                     occured_error.append(
@@ -78,6 +78,7 @@ class MazeFileParsing:
         self.exit = self.property.exit
         self.output_file = self.property.output_file
         self.perfect = self.property.perfect
+        self.seed = self.property.seed
 
     def read_file(self, filepath: str) -> dict[str, Any]:
         data: dict[str, Any] = {}
