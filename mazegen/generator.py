@@ -3,6 +3,7 @@ from .cell import Cell
 import random
 import colors
 import os
+import sys
 
 class MazeGenerator:
     def __init__(self, config_path: str):
@@ -11,6 +12,10 @@ class MazeGenerator:
             [Cell(x, y) for x in range(self.config.width)]
             for y in range(self.config.height)
         ]
+
+        sys.setrecursionlimit(10000)
+        self.config.seed = random.randint(0, 99999999)
+        random.seed(self.config.seed)
 
     def _embed_42_pattern(self) -> None:
         offset_x: int = (self.config.width - 7) // 2

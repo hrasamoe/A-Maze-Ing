@@ -12,7 +12,7 @@ class MazeProperty(BaseModel):
     exit: tuple[int, int]
     output_file: str = Field(default="maze_output.txt", min_length=2)
     perfect: bool = Field(default=True)
-    seed: int = Field(default=78)
+    seed: int | None= Field(default=None)
 
 
 class MazeConfig:
