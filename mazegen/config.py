@@ -120,11 +120,11 @@ class MazeConfig:
     def logic_chek(self,) -> None:
         if self.property.entry == self.property.exit:
             raise ValueError("Entry and Exit coordinates cannot be identical")
-        x1, y2 = self.property.entry
+        x1, y1 = self.property.entry
         x2, y2 = self.property.exit
-        if (0 <= x1 < self.property.width
-                and 0 <= y2 < self.property.height):
+        if not (0 <= x1 < self.property.width
+                and 0 <= y1 < self.property.height):
             raise ValueError(f"Entry {self.property.entry} is out of bounds")
-        if (0 <= x2 < self.property.width
+        if not (0 <= x2 < self.property.width
                 and 0 <= y2 < self.property.height):
             raise ValueError(f"Exit {self.property.exit} is out of bounds.")
