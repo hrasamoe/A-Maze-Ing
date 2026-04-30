@@ -1,0 +1,158 @@
+from .config import MazeConfig
+from .cell import Cell
+import random
+
+class MazeGenerator:
+    def __init__(self, config_path: str):
+        self.config: MazeConfig = MazeConfig(config_path)
+        self.grid: list[list[Cell]] = [
+            [Cell(x, y) for x in range(self.config.width)]
+            for y in range(self.config.height)
+        ]
+
+    def _embed_42_pattern(self) -> None:
+        offset_x: int = (self.config.width - 7) // 2
+        offset_y: int = (self.config.height - 5) // 2
+
+        pattern_42: list[tuple[int, int]] = [
+            (0, 0), (2, 0), (0, 1), (2, 1), (0, 2),
+            (1, 2), (2, 2), (2, 3), (2, 4),
+            (4, 0), (5, 0), (6, 0), (6, 1), (4, 2),
+            (5, 2), (6, 2), (4, 3), (4, 4), (5, 4), (6, 4)
+        ]
+
+        for rel_x, rel_y in pattern_42:
+            tx: int = offset_x + rel_x
+            ty: int = offset_y + rel_y
+
+            if (tx, ty) == self.config.entry or (tx, ty) == self.config.exit:
+                raise ValueError(
+                    "Entry/Exit coordinates overlap with '42' pattern."
+                )
+
+            self.grid[ty][tx].is_42 = True
+            self.grid[ty][tx].visited = True
+            self.grid[ty][tx].walls = 15
+
+    def transform_maze_to_hexa(self) -> str:
+        result: str = ""
+        for y in range(self.config.height):
+            for x in range(self.config.width):
+                result += f"{self.grid[y][x].walls:X}"
+            result += '\n'
+        return result
+
+    def _crete_imperfect_way(self) -> None:
+        for y in range(self.config.height):
+            for x in range(self.config.width):
+                cell = self.grid[y][x]
+
+                if cell.is_42:
+                    continue
+
+                closed_walls = sum([
+                    cell.has_wall(Cell.NORTH),
+                    cell.has_wall(Cell.EAST),
+                    cell.has_wall(Cell.SOUTH),
+                    cell.has_wall(Cell.WEST)
+                ])
+                if closed_walls == 3:
+                    if random.random() < 0.50:
+                        options = []
+                        if y > 0 and cell.has_wall(Cell.north):
+                            options.append((0, -1, Cell.north, Cell.south))
+                        if y < self.config.height - 1 and cell.has_wall(Cell.south):
+                            options.append((0, 1, Cell.south, Cell.north))
+                        if x > 0 and cell.has_wall(Cell.west):
+                            options.append((-1, 0, Cell.west, Cell.east))
+                        if x < self.config.width - 1 and cell.has_wall(Cell.east):
+                            options.append((1, 0, Cell.east, Cell.west))
+                        
+                        random.shuffle(options)
+                        for dx, dy, dir_out, next_dir_in in options:
+                            tx, ty = x + dx, y + dy
+                            if not self.grid[ty][tx].is_42:
+                                cell.remove_wall(dir_out)
+                                self.grid[ty][tx].remove_wall(next_dir_in)
+                                break
+
+    def create_maze_with_bfs(self, animate:bool = False, delay: float = 0.02) -> None:
+        start_x: int = random.randint(0, self.config.width - 1)
+        start_y: int = random.randint(0, self.config.height - 1)
+        while self.grid[start_y][start_x].is_42:
+            start_x: int = random.randint(0, self.config.width - 1)
+            start_y: int = random.randint(0, self.config.height - 1)
+        self.grid[start_x][start_y].visited = True
+        frontier: list[tuple[int, int]] = []
+        
+        def add_frontier(x: int, y: int) -> None:
+            for dx, dy in [(0, -1), (1, 0), (0, 1), (-1, 0)]:
+                tx, ty = x + dx, y + dy
+                if (0 <= tx < self.config.width
+                        and 0 <= ty < self.config.height):
+                    if (not self.grid[ty][tx].visited 
+                            and (tx, ty) not in frontier):
+                        frontier.append((tx, ty))
+        add_frontier(start_x, start_y)
+        while frontier:
+            index: int = random.randint(0, len(frontier) - 1)
+            dx, dy = frontier.pop(index)
+            self.grid[dy][dx].visited = True
+            maze_neighbors = []
+            option: list[tuple[int, int, int, int]] = [
+                (0, -1, Cell.north, Cell.south),
+                (0, 1, Cell.south, Cell.north),
+                (-1, 0, Cell.west, Cell.east),
+                (1, 0, Cell.east, Cell.west),
+            ]
+            for ox, oy, dir_out, nex_dir_in in option:
+                tx, ty =  dx + ox, dy + oy
+                if (0 <= tx < self.config.width
+                        and 0 <= ty < self.config.height):
+                    if (not self.grid[ty][tx].is_42):
+                        maze_neighbors.append((tx, ty, dir_out, nex_dir_in))
+            if maze_neighbors:
+                nx, ny, dir_out, nex_dir_in = random.choice(maze_neighbors)
+                self.grid[dy][dx].remove_wall(dir_out)
+                self.grid[ny][nx].remove_wall(nex_dir_in)
+            
+            add_frontier(dx, dy)
+
+    def solve_maze(self, start_x: int, start_y: int, end_x: int, end_y: int) -> str:
+        visited: set[tuple[int, int]] = set()
+        visited.add((start_x, start_y))
+        queue: list[tuple[int, int, str]] = [(start_x, start_y, "")]
+        while queue:
+            x, y, current_path = queue.pop(0)
+            if x == end_x and y == end_y:
+                return current_path
+            options = [
+                (0, -1, Cell.NORTH, "N"),
+                (1, 0, Cell.EAST, "E"),
+                (0, 1, Cell.SOUTH, "S"),
+                (-1, 0, Cell.WEST, "W")
+            ]
+            for dx, dy, wall_mask, dir_str in options:
+                if not self.grid[dy][dx].has_wall(wall_mask):
+                    tx, ty = x + dx, y + dy
+                    if (tx, ty) not in visited:
+                        visited.add((tx, ty))
+                        queue.append((tx, ty, wall_mask, current_path + dir_str))
+        return ""
+
+    def save_maze(self) -> None:
+        try:
+            with open(self.config.output_file, 'w') as fd:
+                fd.write(self.transform_maze_to_hexa().strip() + '\n')
+                fd.write('\n')
+                ex, ey = self.config.entry
+                xx, xy = self.config.exit
+                fd.write(f"{ex}, {ey}\n")
+                fd.write(f"{xx}, {xy}\n")
+                solution = self.solve_maze(ex, ey, xx, xy)
+                fd.write(f"{solution}\n")
+        except OSError as e :
+            raise  Exception(
+                "An Error was occured"
+                f"{e}"
+            )
