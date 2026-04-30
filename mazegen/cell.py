@@ -7,7 +7,7 @@ class Cell:
     def __int__(self, x: int, y: int) -> None:
         self.x: int = x
         self.y: int = y
-        self.wals: int = 15
+        self.walls: int = 15
         self.visited: bool = False
         self.is_42: bool = False
 
