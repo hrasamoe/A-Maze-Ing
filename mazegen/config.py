@@ -1,4 +1,5 @@
-from pydantic import BaseModel, Field, Any, ValidationError
+from typing import Any
+from pydantic import BaseModel, Field, ValidationError
 
 
 class MazeProperty(BaseModel):
@@ -12,7 +13,7 @@ class MazeProperty(BaseModel):
     exit: tuple[int, int]
     output_file: str = Field(default="maze_output.txt", min_length=2)
     perfect: bool = Field(default=True)
-    seed: int | None= Field(default=None)
+    seed: int | None = Field(default=None)
 
 
 class MazeConfig:
@@ -24,7 +25,7 @@ class MazeConfig:
             self.property = MazeProperty(**raw_data)
         except ValidationError as e:
             occured_error = []
-            for err in e.error():
+            for err in e.errors():
                 field_name = str(err.get('loc')[0]).upper()
                 error_type = err.get("type")
                 if error_type == "missing":
@@ -111,7 +112,7 @@ class MazeConfig:
                                 "ENTRY/EXIT = x,y "
                             )
                     else:
-                        data[key.lower] = value
+                        data[key.lower()] = value
             return data
         except OSError as e:
             raise OSError(f"[ERROR PARSING FILE CONFIG]: {e}")
@@ -121,9 +122,9 @@ class MazeConfig:
             raise ValueError("Entry and Exit coordinates cannot be identical")
         x1, y2 = self.property.entry
         x2, y2 = self.property.exit
-        if not (0 <= x1 < self.property.width
+        if (0 <= x1 < self.property.width
                 and 0 <= y2 < self.property.height):
             raise ValueError(f"Entry {self.property.entry} is out of bounds")
-        if not (0 <= x2 < self.property.width
+        if (0 <= x2 < self.property.width
                 and 0 <= y2 < self.property.height):
             raise ValueError(f"Exit {self.property.exit} is out of bounds.")

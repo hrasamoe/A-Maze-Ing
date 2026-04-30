@@ -4,7 +4,7 @@ class Cell:
     south: int = 2
     west: int = 1
 
-    def __int__(self, x: int, y: int) -> None:
+    def __init__(self, x: int, y: int) -> None:
         self.x: int = x
         self.y: int = y
         self.walls: int = 15
@@ -12,7 +12,7 @@ class Cell:
         self.is_42: bool = False
 
     def remove_wall(self, direction: int) -> None:
-        self.wals &= ~direction
+        self.walls &= ~direction
 
     def has_wall(self, direction: int) -> bool:
-        return bool(self.wals & direction)
+        return bool(self.walls & direction)

@@ -1,9 +1,10 @@
 from .config import MazeConfig
 from .cell import Cell
+from mazegen import colors
 import random
-import colors
 import os
 import sys
+
 
 class MazeGenerator:
     def __init__(self, config_path: str):
@@ -58,23 +59,25 @@ class MazeGenerator:
                     continue
 
                 closed_walls = sum([
-                    cell.has_wall(Cell.NORTH),
-                    cell.has_wall(Cell.EAST),
-                    cell.has_wall(Cell.SOUTH),
-                    cell.has_wall(Cell.WEST)
+                    cell.has_wall(Cell.north),
+                    cell.has_wall(Cell.east),
+                    cell.has_wall(Cell.south),
+                    cell.has_wall(Cell.west)
                 ])
                 if closed_walls == 3:
                     if random.random() < 0.50:
                         options = []
                         if y > 0 and cell.has_wall(Cell.north):
                             options.append((0, -1, Cell.north, Cell.south))
-                        if y < self.config.height - 1 and cell.has_wall(Cell.south):
+                        if (y < self.config.height - 1
+                                and cell.has_wall(Cell.south)):
                             options.append((0, 1, Cell.south, Cell.north))
                         if x > 0 and cell.has_wall(Cell.west):
                             options.append((-1, 0, Cell.west, Cell.east))
-                        if x < self.config.width - 1 and cell.has_wall(Cell.east):
+                        if (x < self.config.width - 1
+                                and cell.has_wall(Cell.east)):
                             options.append((1, 0, Cell.east, Cell.west))
-                        
+
                         random.shuffle(options)
                         for dx, dy, dir_out, next_dir_in in options:
                             tx, ty = x + dx, y + dy
@@ -83,21 +86,24 @@ class MazeGenerator:
                                 self.grid[ty][tx].remove_wall(next_dir_in)
                                 break
 
-    def create_maze_with_bfs(self, animate:bool = False, delay: float = 0.02) -> None:
+    def create_maze_with_bfs(
+                                self,
+                                animate: bool = False,
+                                delay: float = 0.02) -> None:
         start_x: int = random.randint(0, self.config.width - 1)
         start_y: int = random.randint(0, self.config.height - 1)
         while self.grid[start_y][start_x].is_42:
-            start_x: int = random.randint(0, self.config.width - 1)
-            start_y: int = random.randint(0, self.config.height - 1)
+            start_x = random.randint(0, self.config.width - 1)
+            start_y = random.randint(0, self.config.height - 1)
         self.grid[start_x][start_y].visited = True
         frontier: list[tuple[int, int]] = []
-        
+
         def add_frontier(x: int, y: int) -> None:
             for dx, dy in [(0, -1), (1, 0), (0, 1), (-1, 0)]:
                 tx, ty = x + dx, y + dy
                 if (0 <= tx < self.config.width
                         and 0 <= ty < self.config.height):
-                    if (not self.grid[ty][tx].visited 
+                    if (not self.grid[ty][tx].visited
                             and (tx, ty) not in frontier):
                         frontier.append((tx, ty))
         add_frontier(start_x, start_y)
@@ -113,7 +119,7 @@ class MazeGenerator:
                 (1, 0, Cell.east, Cell.west),
             ]
             for ox, oy, dir_out, nex_dir_in in option:
-                tx, ty =  dx + ox, dy + oy
+                tx, ty = dx + ox, dy + oy
                 if (0 <= tx < self.config.width
                         and 0 <= ty < self.config.height):
                     if (not self.grid[ty][tx].is_42):
@@ -122,10 +128,12 @@ class MazeGenerator:
                 nx, ny, dir_out, nex_dir_in = random.choice(maze_neighbors)
                 self.grid[dy][dx].remove_wall(dir_out)
                 self.grid[ny][nx].remove_wall(nex_dir_in)
-            
+
             add_frontier(dx, dy)
 
-    def solve_maze(self, start_x: int, start_y: int, end_x: int, end_y: int) -> str:
+    def solve_maze(self,
+                   start_x: int, start_y: int,
+                   end_x: int, end_y: int) -> str:
         visited: set[tuple[int, int]] = set()
         visited.add((start_x, start_y))
         queue: list[tuple[int, int, str]] = [(start_x, start_y, "")]
@@ -134,17 +142,17 @@ class MazeGenerator:
             if x == end_x and y == end_y:
                 return current_path
             options = [
-                (0, -1, Cell.NORTH, "N"),
-                (1, 0, Cell.EAST, "E"),
-                (0, 1, Cell.SOUTH, "S"),
-                (-1, 0, Cell.WEST, "W")
+                (0, -1, Cell.north, "N"),
+                (1, 0, Cell.east, "E"),
+                (0, 1, Cell.south, "S"),
+                (-1, 0, Cell.west, "W")
             ]
             for dx, dy, wall_mask, dir_str in options:
                 if not self.grid[dy][dx].has_wall(wall_mask):
                     tx, ty = x + dx, y + dy
                     if (tx, ty) not in visited:
                         visited.add((tx, ty))
-                        queue.append((tx, ty, wall_mask, current_path + dir_str))
+                        queue.append((tx, ty, current_path + dir_str))
         return ""
 
     def _get_path_coords(
@@ -176,26 +184,29 @@ class MazeGenerator:
                 fd.write(f"{xx}, {xy}\n")
                 solution = self.solve_maze(ex, ey, xx, xy)
                 fd.write(f"{solution}\n")
-        except OSError as e :
-            raise  Exception(
+        except OSError as e:
+            raise Exception(
                 "An Error was occured"
                 f"{e}"
             )
 
-    def render_terminal(self, player_pos: tuple[int, int] | None = None, solution_mode: int = 0, wall_color: str = colors.WHITE) -> None:
+    def render_terminal(self,
+                        player_pos: tuple[int, int] | None = None,
+                        solution_mode: int = 0,
+                        wall_color: str = colors.WHITE) -> None:
         os.system('clear')
         px, py = player_pos if player_pos else self.config.entry
         ex, ey = self.config.exit
         solution: set[tuple[int, int]] = set()
         if solution_mode == 1:
             path_str = self.solve_maze(px, py, ex, ey)
-            solution = self._get_path_coords(px,py, path_str)
-        
+            solution = self._get_path_coords(px, py, path_str)
+
         for y in range(self.config.height):
             line1 = ""
             line2 = ""
             for x in range(self.config.width):
-                cell: Cell = cell.grid[y][x]
+                cell: Cell = self.grid[y][x]
                 center: str = "   "
                 if (x, y) == (px, py):
                     center = f"{colors.GREEN}🚗 {wall_color}"

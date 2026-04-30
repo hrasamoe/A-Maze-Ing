@@ -22,14 +22,22 @@ def main() -> None:
 
         while True:
             palette = colors.COLOR_PALETTE
-            current_color = palette[colors % len(palette)]
-            maze.render_terminal(solution_mode, current_color)
+            current_color = palette[color_index % len(palette)]
+            maze.render_terminal(
+                solution_mode=solution_mode,
+                wall_color=current_color)
             if is_perfect:
-                perfect_str = f"{colors.GREEN}PERFECT (Single Path){colors.RESET}"
+                perfect_str = (
+                                f"{colors.GREEN}PERFECT (Single Path)"
+                                f"{colors.RESET}"
+                )
             else:
-                perfect_str = f"{colors.YELLOW}IMPERFECT (Braid Path){colors.RESET}"
+                perfect_str = (
+                                f"{colors.YELLOW}IMPERFECT"
+                                f"(Braid Path){colors.RESET}"
+                )
             save_str = f"{colors.GREEN}[Saved!]{colors.RESET}" if saved else ""
-            
+
             print(f"\n{colors.WHITE}=== A-Maze-Ing Menu ==={colors.RESET}")
             print(" 1. Regenerate Maze")
             print(" 2. Show the shortest path solution")
