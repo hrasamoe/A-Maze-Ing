@@ -38,13 +38,13 @@ def main() -> None:
                 )
             if animate:
                 animation_str = (
-                                f"\033[32m Generation Animation [True]"
+                                f"\033[32m Generate with animation [True]"
                                 f"{colors.RESET}"
                 )
             else:
                 animation_str = (
-                                f"{colors.YELLOW}Generate"
-                                f"Animation [False]{colors.RESET}"
+                                f"{colors.YELLOW}Generate with "
+                                f"animation [False]{colors.RESET}"
                 )
             save_str = f"\033[32m[Saved!]{colors.RESET}" if saved else ""
 
