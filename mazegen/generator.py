@@ -1,6 +1,8 @@
 from .config import MazeConfig
 from .cell import Cell
 import random
+import colors
+import os
 
 class MazeGenerator:
     def __init__(self, config_path: str):
@@ -140,6 +142,24 @@ class MazeGenerator:
                         queue.append((tx, ty, wall_mask, current_path + dir_str))
         return ""
 
+    def _get_path_coords(
+        self, start_x: int, start_y: int, path_str: str
+    ) -> set[tuple[int, int]]:
+        """Converts directional string ('NESW') into coords (X, Y)."""
+        coords: set[tuple[int, int]] = set()
+        cx, cy = start_x, start_y
+        for move in path_str:
+            if move == 'N':
+                cy -= 1
+            elif move == 'S':
+                cy += 1
+            elif move == 'E':
+                cx += 1
+            elif move == 'W':
+                cx -= 1
+            coords.add((cx, cy))
+        return coords
+
     def save_maze(self) -> None:
         try:
             with open(self.config.output_file, 'w') as fd:
@@ -156,3 +176,44 @@ class MazeGenerator:
                 "An Error was occured"
                 f"{e}"
             )
+
+    def render_terminal(self, player_pos: tuple[int, int] | None = None, solution_mode: int = 0, wall_color: str = colors.WHITE) -> None:
+        os.system('clear')
+        px, py = player_pos if player_pos else self.config.entry
+        ex, ey = self.config.exit
+        solution: set[tuple[int, int]] = set()
+        if solution_mode == 1:
+            path_str = self.solve_maze(px, py, ex, ey)
+            solution = self._get_path_coords(px,py, path_str)
+        
+        for y in range(self.config.height):
+            line1 = ""
+            line2 = ""
+            for x in range(self.config.width):
+                cell: Cell = cell.grid[y][x]
+                center: str = "   "
+                if (x, y) == (px, py):
+                    center = f"{colors.GREEN}🚗 {wall_color}"
+                elif (x, y) == self.config.entry:
+                    center = f"{colors.BLUE} E {wall_color}"
+                elif (x, y) == self.config.exit:
+                    center = f"{colors.GREEN} S {wall_color}"
+                elif (x, y) in solution:
+                    center = f"{colors.YELLOW} * {wall_color}"
+                elif cell.is_42:
+                    center = f"{colors.GREEN}███{wall_color}"
+                if cell.has_wall(Cell.north):
+                    line1 += "█████"
+                else:
+                    line1 += "█   █"
+                left = "█" if cell.has_wall(Cell.west) else " "
+                right = "█" if cell.has_wall(Cell.east) else " "
+                if cell.walls == 15 and not cell.is_42:
+                    line2 += "█████"
+                else:
+                    line2 += f"{left}{center}{right}"
+            print(f"{wall_color}{line1}{colors.RESET}")
+            print(f"{wall_color}{line2}{colors.RESET}")
+        print(
+            f"{wall_color}" + "█████" * self.config.width + f"{colors.RESET}"
+        )
