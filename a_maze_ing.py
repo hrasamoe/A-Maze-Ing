@@ -19,16 +19,16 @@ def main() -> None:
         solution_mode = 0
         is_perfect = maze.config.perfect
         saved = False
+        animate = False
 
         while True:
             palette = colors.COLOR_PALETTE
             current_color = palette[color_index % len(palette)]
             maze.render_terminal(
-                solution_mode=solution_mode,
-                wall_color=current_color)
+                solution_mode=solution_mode, wall_color=current_color)
             if is_perfect:
                 perfect_str = (
-                                f"{colors.GREEN}PERFECT (Single Path)"
+                                f"\033[32mPERFECT (Single Path)"
                                 f"{colors.RESET}"
                 )
             else:
@@ -36,39 +36,53 @@ def main() -> None:
                                 f"{colors.YELLOW}IMPERFECT"
                                 f"(Braid Path){colors.RESET}"
                 )
-            save_str = f"{colors.GREEN}[Saved!]{colors.RESET}" if saved else ""
+            if animate:
+                animation_str = (
+                                f"\033[32m Generation Animation [True]"
+                                f"{colors.RESET}"
+                )
+            else:
+                animation_str = (
+                                f"{colors.YELLOW}Generate"
+                                f"Animation [False]{colors.RESET}"
+                )
+            save_str = f"\033[32m[Saved!]{colors.RESET}" if saved else ""
 
             print(f"\n{colors.WHITE}=== A-Maze-Ing Menu ==={colors.RESET}")
             print(" 1. Regenerate Maze")
-            print(" 2. Show the shortest path solution")
-            print(" 3. Hide Solution Path")
-            print(" 4. Change Wall Color")
-            print(f" 5. Toggle Perfect Maze              {perfect_str}")
-            print(f" 6. Save maze to File                {save_str}")
-            print(" 0. Quit The Game")
+            print(f" 2. Toggle Animation                 {animation_str}")
+            print(" 3. Show the shortest path solution")
+            print(" 4. Hide Solution Path")
+            print(" 5. Change Wall Color")
+            print(f" 6. Toggle Perfect Maze              {perfect_str}")
+            print(f" 7. Save maze to File                {save_str}")
+            print(" 8. Quit The Game")
             choice = input("Choice (1-11): ").strip()
             if choice != '6':
                 saved = False
             if choice == '1':
                 maze = MazeGenerator(config_file)
                 maze.config.perfect = is_perfect
+                maze.create_maze_with_bfs(animate)
                 solution_mode = 0
             elif choice == '2':
-                solution_mode = 1
+                animate = not animate
             elif choice == '3':
-                solution_mode = 0
+                solution_mode = 1
             elif choice == '4':
-                color_index += 1
+                solution_mode = 0
             elif choice == '5':
-                is_perfect = not is_perfect
+                color_index += 1
             elif choice == '6':
+                is_perfect = not is_perfect
+            elif choice == '7':
                 maze.save_maze()
                 saved = True
-            elif choice == '0':
+            elif choice == '8':
                 print("[+] Good Bye")
                 break
             else:
-                print("Please Provide a valid choice (0 - 6)")
+                print("Please Provide a valid choice (1 - 8)")
                 input()
     except Exception as e:
         print(f"Error: {e}")

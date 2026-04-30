@@ -4,6 +4,7 @@ from mazegen import colors
 import random
 import os
 import sys
+import time
 
 
 class MazeGenerator:
@@ -17,6 +18,7 @@ class MazeGenerator:
         sys.setrecursionlimit(10000)
         self.config.seed = random.randint(0, 99999999)
         random.seed(self.config.seed)
+        self._embed_42_pattern()
 
     def _embed_42_pattern(self) -> None:
         offset_x: int = (self.config.width - 7) // 2
@@ -95,7 +97,7 @@ class MazeGenerator:
         while self.grid[start_y][start_x].is_42:
             start_x = random.randint(0, self.config.width - 1)
             start_y = random.randint(0, self.config.height - 1)
-        self.grid[start_x][start_y].visited = True
+        self.grid[start_y][start_x].visited = True
         frontier: list[tuple[int, int]] = []
 
         def add_frontier(x: int, y: int) -> None:
@@ -122,14 +124,20 @@ class MazeGenerator:
                 tx, ty = dx + ox, dy + oy
                 if (0 <= tx < self.config.width
                         and 0 <= ty < self.config.height):
-                    if (not self.grid[ty][tx].is_42):
+                    if (self.grid[ty][tx].visited and
+                            not self.grid[ty][tx].is_42):
                         maze_neighbors.append((tx, ty, dir_out, nex_dir_in))
             if maze_neighbors:
                 nx, ny, dir_out, nex_dir_in = random.choice(maze_neighbors)
                 self.grid[dy][dx].remove_wall(dir_out)
                 self.grid[ny][nx].remove_wall(nex_dir_in)
-
             add_frontier(dx, dy)
+            if animate:
+                self.render_terminal()
+                time.sleep(delay)
+
+        if not self.config.perfect:
+            self._crete_imperfect_way()
 
     def solve_maze(self,
                    start_x: int, start_y: int,
@@ -148,7 +156,7 @@ class MazeGenerator:
                 (-1, 0, Cell.west, "W")
             ]
             for dx, dy, wall_mask, dir_str in options:
-                if not self.grid[dy][dx].has_wall(wall_mask):
+                if not self.grid[y][x].has_wall(wall_mask):
                     tx, ty = x + dx, y + dy
                     if (tx, ty) not in visited:
                         visited.add((tx, ty))
@@ -209,15 +217,15 @@ class MazeGenerator:
                 cell: Cell = self.grid[y][x]
                 center: str = "   "
                 if (x, y) == (px, py):
-                    center = f"{colors.GREEN}🚗 {wall_color}"
+                    center = f"\033[32m 🚗{wall_color}"
                 elif (x, y) == self.config.entry:
                     center = f"{colors.BLUE} E {wall_color}"
                 elif (x, y) == self.config.exit:
-                    center = f"{colors.GREEN} S {wall_color}"
+                    center = f"\033[32m S {wall_color}"
                 elif (x, y) in solution:
-                    center = f"{colors.YELLOW} * {wall_color}"
+                    center = f"{colors.YELLOW} ● {wall_color}"
                 elif cell.is_42:
-                    center = f"{colors.GREEN}███{wall_color}"
+                    center = f"\033[32m███{wall_color}"
                 if cell.has_wall(Cell.north):
                     line1 += "█████"
                 else:
