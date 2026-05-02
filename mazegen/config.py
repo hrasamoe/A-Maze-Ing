@@ -14,6 +14,8 @@ class MazeProperty(BaseModel):
     output_file: str = Field(default="maze_output.txt", min_length=2)
     perfect: bool = Field(default=True)
     seed: int | None = Field(default=None)
+    window_w: int = 800
+    window_h: int = 600
 
 
 class MazeConfig:
@@ -75,6 +77,8 @@ class MazeConfig:
         self.logic_chek()
         self.width = self.property.width
         self.height = self.property.height
+        self.window_w = self.property.window_w
+        self.window_h = self.property.window_h
         self.entry = self.property.entry
         self.exit = self.property.exit
         self.output_file = self.property.output_file

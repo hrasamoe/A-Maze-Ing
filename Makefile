@@ -18,6 +18,7 @@ install: $(STAMP)
 run: install
 	$(PYTHON) a_maze_ing.py config.txt
 
+
 build: install
 	$(PYTHON) -m build --sdist --wheel --outdir .
 	@echo "\n[i] Package built! Files ate in the root directory"

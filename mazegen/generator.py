@@ -5,6 +5,7 @@ import random
 import os
 import sys
 import time
+from mlx import Mlx
 
 
 class MazeGenerator:
@@ -14,7 +15,6 @@ class MazeGenerator:
             [Cell(x, y) for x in range(self.config.width)]
             for y in range(self.config.height)
         ]
-
         sys.setrecursionlimit(10000)
         self.config.seed = random.randint(0, 99999999)
         random.seed(self.config.seed)
