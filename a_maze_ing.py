@@ -1,7 +1,6 @@
 from mazegen.generator import MazeGenerator
 from mazegen import colors
 from mazegen.mlx_wondow import Renderer
-from mlx import Mlx
 import sys
 
 
@@ -22,7 +21,7 @@ def main() -> None:
         is_perfect = maze.config.perfect
         saved = False
         animate = False
-        
+
         while True:
             palette = colors.COLOR_PALETTE
             current_color = palette[color_index % len(palette)]
@@ -89,16 +88,7 @@ def main() -> None:
     except Exception as e:
         print(f"Error: {e}")
         sys.exit(1)
-    finally:
-        try:
-            m.mlx_loop(mlx)
-            m.mlx_destroy_window(mlx, window)
-            m.mlx_release(mlx)
-        except RuntimeError:
-            print("Module MLX not found")
 
-def close(d: str = "") -> None:
-    m.mlx_loop_exit(mlx)
 
 if __name__ == "__main__":
     Renderer().run()

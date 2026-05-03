@@ -5,7 +5,6 @@ import random
 import os
 import sys
 import time
-from mlx import Mlx
 
 
 class MazeGenerator:
@@ -71,7 +70,7 @@ class MazeGenerator:
                         options = []
                         if y > 0 and cell.has_wall(Cell.north):
                             options.append((0, -1, Cell.north, Cell.south))
-                        if (y < self.config.height - 1
+                        if (y < self.config.width - 1
                                 and cell.has_wall(Cell.south)):
                             options.append((0, 1, Cell.south, Cell.north))
                         if x > 0 and cell.has_wall(Cell.west):

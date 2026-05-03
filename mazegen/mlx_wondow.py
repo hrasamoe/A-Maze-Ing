@@ -1,15 +1,17 @@
-from mlx import Mlx
+from mlx import Mlx  # type: ignore
 from mazegen import colors
-from mazegen.config import MazeConfig
 from mazegen.cell import Cell
 from mazegen.generator import MazeGenerator
 import random
 import ctypes
-import os
 import time
+import math
+
 
 class Renderer:
-    def __init__(self, w: int = 1200, h: int = 800, config_path: str = "config.txt") -> None:
+    def __init__(
+                self, w: int = 1200, h: int = 800,
+                config_path: str = "config.txt") -> None:
         self.maze: MazeGenerator = MazeGenerator(config_path)
         self.config_path = config_path
         self.w: int = self.maze.config.window_w
@@ -26,21 +28,25 @@ class Renderer:
         self.data, self.bpp, self.sl, _ = \
             self.mlx.mlx_get_data_addr(self.img)
         self.bpp = self.bpp // 8
-        #initialisation labyrinth
-
+        total = self.maze.config.width * self.maze.config.height
+        self.s: dict = {
+                't_last':  time.time(),  # timestamp de la dernière frame
+                'elapsed': 0.0,           # temps total écoulé en secondes
+                'x':       0,  # position X du centre du carré
+                'y':       0,  # position Y
+                'vx':      200.0,         # vitesse X en pixels / seconde
+                'vy':      150.0,         # vitesse Y en pixels / seconde
+                'angle':   0.0,
+                'count': 0,
+                'reveal_order': random.sample(range(total), total)
+                }
+        self.wall_color = colors.MLX_WHITE
+        self.toggle_solution = False
 
     def put_pixel(self, x: int, y: int, color: int) -> None:
         if 0 <= x < self.w and 0 <= y < self.h:
             off: int = y * self.sl + x * (self.bpp)
             self.data[off:off+self.bpp] = color.to_bytes(self.bpp, 'little')
-
-    def draw_square(
-        self, x: int, y: int, size: int, color: int
-    ) -> None:
-        """Carré plein de côté `size` avec coin supérieur gauche en (x, y)."""
-        for row in range(y, y + size):
-            for col in range(x, x + size):
-                self.put_pixel(col + x, row + y, color)
 
     def draw_rect(
         self, x: int, y: int,
@@ -53,25 +59,18 @@ class Renderer:
             for col in range(x, x + rect_w):
                 self.put_pixel(col, row, color)
 
-    def _fill_rect(self,
-               x: int, y: int,
-               w: int, h: int,
-               color: int) -> None:
+    def _fill_rect(
+                self, x: int, y: int,
+                w: int, h: int,
+                color: int
+                ) -> None:
+        row_bytes = color.to_bytes(self.bpp, 'little') * w
         for dy in range(h):
-            for dx in range(w):
-                self.put_pixel(x + dx, y + dy, color)
+            off = (y + dy) * self.sl + x * self.bpp
+            self.data[off:off + w * self.bpp] = row_bytes
 
-    def draw_square_outline(
-        self, x: int, y: int, size: int,
-        thickness: int, color: int
-    ) -> None:
-        """Contour d'un carré avec épaisseur de trait."""
-        for t in range(thickness):
-            for i in range(size):
-                self.put_pixel(x + i, y + t, color)
-                self.put_pixel(x + i, y + size - 1 - t, color)
-                self.put_pixel(x + t, y + i, color)
-                self.put_pixel(x + size - 1 - t, y + i, color)
+    def clear(self) -> None:
+        self.data[0:self.sl * self.h] = b'\x00' * (self.sl * self.h)
 
     def text(self, x: int, y: int, color: int, s: str) -> None:
         """Affiche du texte dans la fenêtre (pas dans le buffer image)."""
@@ -82,116 +81,52 @@ class Renderer:
         self.mlx.mlx_put_image_to_window(
             self.mlx_ptr, self.win, self.img, 0, 0)
 
-    #draw42
-    def _embed_42_pattern(self, config: dict[str, int], color: int) -> None:
-        offset_x: int = (self.maze.config.width - 7) // 2
-        offset_y: int = (self.maze.config.height - 5) // 2
+    def _loop(self, data: object) -> None:
+        self.render_terminal(
+                            solution_mode=self.toggle_solution,
+                            wall_color=self.wall_color)
+        self.flush()
 
-        pattern_42: list[tuple[int, int]] = [
-            (0, 0), (2, 0), (0, 1), (2, 1), (0, 2),
-            (1, 2), (2, 2), (2, 3), (2, 4),
-            (4, 0), (5, 0), (6, 0), (6, 1), (4, 2),
-            (5, 2), (6, 2), (4, 3), (4, 4), (5, 4), (6, 4)
-        ]
-
-        for rel_x, rel_y in pattern_42:
-            tx: int = offset_x + rel_x
-            ty: int = offset_y + rel_y
-
-            if (tx, ty) == self.maze.config.entry or (tx, ty) == self.maze.config.exit:
-                raise ValueError(
-                    "Entry/Exit coordinates overlap with '42' pattern."
-                )
-
-            self.maze.grid[ty][tx].is_42 = True
-            self.maze.grid[ty][tx].visited = True
-            self.maze.grid[ty][tx].walls = 15
-
-    
-    #draw maze
-    def create_maze_with_bfs(
-                                self,
-                                animate: bool = False,
-                                delay: float = 0.02) -> None:
-        start_x: int = random.randint(0, self.maze.config.width - 1)
-        start_y: int = random.randint(0, self.maze.config.height - 1)
-        while self.maze.grid[start_y][start_x].is_42:
-            start_x = random.randint(0, self.maze.config.width - 1)
-            start_y = random.randint(0, self.maze.config.height - 1)
-        self.maze.grid[start_y][start_x].visited = True
-        frontier: list[tuple[int, int]] = []
-        def add_frontier(x: int, y: int) -> None:
-            for dx, dy in [(0, -1), (1, 0), (0, 1), (-1, 0)]:
-                tx, ty = x + dx, y + dy
-                if (0 <= tx < self.maze.config.width
-                        and 0 <= ty < self.maze.config.height):
-                    if (not self.maze.grid[ty][tx].visited
-                            and (tx, ty) not in frontier):
-                        frontier.append((tx, ty))
-        add_frontier(start_x, start_y)
-        while frontier:
-            index: int = random.randint(0, len(frontier) - 1)
-            dx, dy = frontier.pop(index)
-            self.maze.grid[dy][dx].visited = True
-            maze_neighbors = []
-            option: list[tuple[int, int, int, int]] = [
-                (0, -1, Cell.north, Cell.south),
-                (0, 1, Cell.south, Cell.north),
-                (-1, 0, Cell.west, Cell.east),
-                (1, 0, Cell.east, Cell.west),
-            ]
-            for ox, oy, dir_out, nex_dir_in in option:
-                tx, ty = dx + ox, dy + oy
-                if (0 <= tx < self.maze.config.width
-                        and 0 <= ty < self.maze.config.height):
-                    if (self.maze.grid[ty][tx].visited and
-                            not self.maze.grid[ty][tx].is_42):
-                        maze_neighbors.append((tx, ty, dir_out, nex_dir_in))
-            if maze_neighbors:
-                nx, ny, dir_out, nex_dir_in = random.choice(maze_neighbors)
-                self.maze.grid[dy][dx].remove_wall(dir_out)
-                self.maze.grid[ny][nx].remove_wall(nex_dir_in)
-            add_frontier(dx, dy)
-        if not self.maze.config.perfect:
-            self._crete_imperfect_way()
-
-    def render_terminal(self,
+    def render_terminal(
+                self,
                 player_pos: tuple[int, int] | None = None,
-                solution_mode: int = 0) -> None:
-        #animation
-        state: dict = {
-            't_last':  time.time(),  # timestamp de la dernière frame
-            'elapsed': 0.0,           # temps total écoulé en secondes
-            'x':       float(W / 2),  # position X du centre du carré
-            'y':       float(H / 2),  # position Y
-            'vx':      200.0,         # vitesse X en pixels / seconde
-            'vy':      150.0,         # vitesse Y en pixels / seconde
-            'angle':   0.0,           # rotation (pour des effets avancés)
-        }
+                solution_mode: bool = False,
+                wall_color: int = colors.MLX_WHITE) -> None:
         now: float = time.time()
-        dt: float = min(now - s['t_last'], 0.05)
-        s['t_last'] = now
-        s['elpased'] += dt
-        #animation
+        dt: float = min(now - self.s['t_last'], 0.05)
+        self.s['t_last'] = now
+        self.s['elapsed'] += dt
+        total_cells = self.maze.config.width * self.maze.config.height
+        reveal_speed = 150  # cellules révélées par seconde
+        revealed = min(int(self.s['elapsed'] * reveal_speed), total_cells)
+        revealed_set = set(self.s['reveal_order'][:revealed])
+        self.clear()
         px, py = player_pos if player_pos else self.maze.config.entry
         ex, ey = self.maze.config.exit
         solution: set[tuple[int, int]] = set()
-
-        # Calcul dynamique de la taille d'une cellule selon la fenêtre
-        cell_w: int = self.maze.config.window_w // self.maze.config.width
-        cell_h: int = (self.maze.config.window_h - 150) // self.maze.config.height
+        window_w = self.maze.config.window_w
+        window_h = self.maze.config.window_h
+        cell_w: int = window_w // self.maze.config.width
+        cell_h: int = (window_h - 20) // self.maze.config.height
         wall_t: int = max(2, min(cell_w, cell_h) // 8)
-
-        if solution_mode == 1:
-            path_str = self.solve_maze(px, py, ex, ey)
-            solution = self._get_path_coords(px, py, path_str)
-
+        if solution_mode:
+            path_str = self.maze.solve_maze(px, py, ex, ey)
+            solution = self.maze._get_path_coords(px, py, path_str)
+        cell_index = 0
         for y in range(self.maze.config.height):
             for x in range(self.maze.config.width):
+                cell_index += 1
                 cell: Cell = self.maze.grid[y][x]
                 cx = x * cell_w
                 cy = y * cell_h
-
+                # Cellule pas encore révélée → gris foncé qui pulse
+                if (cell_index - 1) not in revealed_set:  # pas encore révélée
+                    t = self.s['elapsed'] * 3 + cell_index * .1
+                    pulse = int(20 + 10 * abs(math.sin(t)))
+                    self._fill_rect(
+                                cx, cy, cell_w, cell_h,
+                                pulse << 16 | pulse << 8 | pulse)
+                    continue
                 # Fond
                 if (x, y) == (px, py):
                     bg = colors.MLX_WHITE
@@ -206,73 +141,75 @@ class Renderer:
                 else:
                     bg = colors.MLX_BLACK
                 self._fill_rect(cx, cy, cell_w, cell_h, bg)
-                # Murs — cell_w/cell_h complets pour boucher les coins
+                # Murs
                 if cell.has_wall(Cell.north):
-                    self._fill_rect(cx, cy, cell_w, wall_t, colors.MLX_WHITE)
+                    self._fill_rect(cx, cy, cell_w, wall_t, wall_color)
                 if cell.has_wall(Cell.south):
-                    self._fill_rect(cx, cy + cell_h - wall_t, cell_w, wall_t, colors.MLX_WHITE)
+                    self._fill_rect(
+                            cx, cy + cell_h - wall_t,
+                            cell_w, wall_t, wall_color)
                 if cell.has_wall(Cell.west):
-                    self._fill_rect(cx, cy, wall_t, cell_h, colors.MLX_WHITE)
+                    self._fill_rect(cx, cy, wall_t, cell_h, wall_color)
                 if cell.has_wall(Cell.east):
-                    self._fill_rect(cx + cell_w - wall_t, cy, wall_t, cell_h, colors.MLX_WHITE)
-        
-
-    def draw_menu(self):
-        self.text(0, self.maze.config.window_h - 50, colors.MLX_WHITE, "Menu:")
+                    self._fill_rect(cx + cell_w - wall_t,
+                                    cy, wall_t, cell_h, wall_color)
 
     def draw_new_maze(self):
-        # self._fill_rect(0, 0, self.w, self.h, colors.MLX_BLACK)  # efface
-        self.data[0:self.sl*self.maze.config.window_h] = b'\x00\x00\x00\xff' * (self.sl * self.maze.config.window_h // self.bpp)
+        self.clear()
         self.maze = MazeGenerator(self.config_path)
-        self.create_maze_with_bfs()
-        self.render_terminal()
+        self.maze.create_maze_with_bfs()
+        self.s['elapsed'] = 0.0
+        self.s['t_last'] = time.time()
+        self.s['reveal_order'] = random.sample(
+                range(
+                    self.maze.config.width * self.maze.config.height),
+                self.maze.config.width * self.maze.config.height
+        )
 
     def draw_menu(self, color: int):
-        pos_y = self.maze.config.window_h - 150
-        pos_x = 50
-        self.text(pos_x, pos_y, color, "1. Regenerate Maze [W]")
-        self.text(pos_x, pos_y + 15, color, f"2. Animation: ON")
-        self.text(pos_x, pos_y + 30, color, "3. Show the shortest path solution")
-        self.text(pos_x, pos_y + 45, color, "4. Hide Solution Path")
-        self.text(pos_x, pos_y + 60, color, "5. Change Wall Color")
-        self.text(pos_x, pos_y + 75, color, f"6. Toggle Perfect Maze")
-        self.text(pos_x, pos_y + 90, color, f"7. Save maze to File")
-        self.text(pos_x, pos_y + 105, color, "8. Quit The Game [echap]")
-    
+        pos_y = self.maze.config.window_h - 20
+        pos_x = 10
+        menu_1 = "regenerate[W]"
+        menu_2 = "path[s]"
+        menu_3 = "color[D]"
+        menu_4 = "save[a]"
+        menu_5 = "exit[ECHAP]"
+        self.text(pos_x, pos_y, color, menu_1)
+        self.text(pos_x + 140, pos_y, color, menu_2)
+        self.text(pos_x + 220, pos_y, color, menu_3)
+        self.text(pos_x + 310, pos_y, color, menu_4)
+        self.text(pos_x + 440, pos_y, color, menu_5)
+
     def on_key_pressed(self, keycode: int, param: object):
-        if keycode == 119: #w
+        if keycode == 119:
             self.draw_new_maze()
-            
-        if keycode == 97: #a
-            print("a cliked")
-        if keycode == 115: #s
-            print("s cliked")
-        if keycode == 100: #d
-            print("d cliked")
+        if keycode == 115:
+            self.toggle_solution = not self.toggle_solution
+        if keycode == 100:
+            palette = colors.MLX_COLOR_PALETTE
+            self.wall_color = palette[self.s['count'] % len(palette)]
+            self.s['count'] += 1
+        if keycode == 97:
+            self.maze.save_maze()
         if keycode == 65307:
             self.mlx.mlx_loop_exit(self.mlx_ptr)
-        self.draw_menu(colors.MLX_RED)
-        self.flush()
+
+    def close(self, para: object) -> None:
+        self.mlx.mlx_loop_exit(self.mlx_ptr), None
+
     def run(self) -> None:
         try:
-            config = {
-                "entry": (0,0),
-                "exit": (5,8),
-                "width": self.w,
-                "height": self.h
-            }
-            
-            self._embed_42_pattern(config, 0xFF7C6AF7)
+
+            self.maze._embed_42_pattern()
             self.draw_new_maze()
-            # tout afficher d'un coup
             self.flush()
+            self.draw_menu(colors.MLX_WHITE)
+            self.mlx.mlx_loop_hook(self.mlx_ptr, self._loop, None)
             self.mlx.mlx_key_hook(self.win, self.on_key_pressed, None)
-            self.mlx.mlx_hook(self.win, 33, 0,
-                lambda d: self.mlx.mlx_loop_exit(self.mlx_ptr), None)
+            self.mlx.mlx_hook(self.win, 33, 0, self.close, None)
             self.mlx.mlx_loop(self.mlx_ptr)
         except Exception as e:
             print(f"An error occured : {e}")
         finally:
             self.mlx.mlx_destroy_window(self.mlx_ptr, self.win)
             self.mlx.mlx_release(self.mlx_ptr)
-
