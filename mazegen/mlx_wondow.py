@@ -42,19 +42,43 @@ class Renderer:
                 }
         self.wall_color = colors.MLX_WHITE
         self.toggle_solution = False
+        self.pos_x, self.pos_y = self.maze.config.entry
+        self.game_won = False
+        self.play_mod = False
 
     def put_pixel(self, x: int, y: int, color: int) -> None:
         if 0 <= x < self.w and 0 <= y < self.h:
             off: int = y * self.sl + x * (self.bpp)
             self.data[off:off+self.bpp] = color.to_bytes(self.bpp, 'little')
 
+    def _try_move(self, dx: int, dy: int) -> None:
+        if self.game_won:
+            return
+
+        x, y = self.pos_x, self.pos_y
+        cell: Cell = self.maze.grid[y][x]
+        if dx == 1 and cell.has_wall(Cell.east):
+            return
+        if dx == -1 and cell.has_wall(Cell.west):
+            return
+        if dy == -1 and cell.has_wall(Cell.north):
+            return
+        if dy == 1 and cell.has_wall(Cell.south):
+            return
+        new_x = x + dx
+        new_y = y + dy
+        if not (0 <= new_x < self.maze.config.width):
+            return
+        if not (0 <= new_y < self.maze.config.height):
+            return
+        self.pos_x, self.pos_y = new_x, new_y
+        if (self.pos_x, self.pos_y) == self.maze.config.exit:
+            self.game_won = True
+
     def draw_rect(
         self, x: int, y: int,
         rect_w: int, rect_h: int, color: int
     ) -> None:
-        """Rectangle plein width×height,
-        coin supérieur gauche en (x, y).
-        """
         for row in range(y, y + rect_h):
             for col in range(x, x + rect_w):
                 self.put_pixel(col, row, color)
@@ -73,18 +97,23 @@ class Renderer:
         self.data[0:self.sl * self.h] = b'\x00' * (self.sl * self.h)
 
     def text(self, x: int, y: int, color: int, s: str) -> None:
-        """Affiche du texte dans la fenêtre (pas dans le buffer image)."""
         self.mlx.mlx_string_put(self.mlx_ptr, self.win, x, y, color, s)
 
     def flush(self) -> None:
-        """Envoie le buffer image vers la fenêtre."""
         self.mlx.mlx_put_image_to_window(
             self.mlx_ptr, self.win, self.img, 0, 0)
 
     def _loop(self, data: object) -> None:
         self.render_terminal(
+                            player_pos=(self.pos_x, self.pos_y),
                             solution_mode=self.toggle_solution,
                             wall_color=self.wall_color)
+        if self.game_won:
+            cx = self.w // 2 - 50
+            cy = self.h // 2
+            self.flush()
+            self.text(cx, cy, colors.MLX_GREEN, "YOU WIN! [W] to replay")
+            return
         self.flush()
 
     def render_terminal(
@@ -120,8 +149,7 @@ class Renderer:
                 cell: Cell = self.maze.grid[y][x]
                 cx = x * cell_w
                 cy = y * cell_h
-                # Cellule pas encore révélée → gris foncé qui pulse
-                if (cell_index - 1) not in revealed_set:  # pas encore révélée
+                if (cell_index - 1) not in revealed_set:
                     t = self.s['elapsed'] * 3 + cell_index * .1
                     pulse = int(20 + 10 * abs(math.sin(t)))
                     self._fill_rect(
@@ -130,7 +158,7 @@ class Renderer:
                     continue
                 # Fond
                 if (x, y) == (px, py):
-                    bg = colors.MLX_WHITE
+                    bg = colors.MLX_RED
                 elif (x, y) == self.maze.config.entry:
                     bg = colors.MLX_YELLOW
                 elif (x, y) == self.maze.config.exit:
@@ -166,6 +194,8 @@ class Renderer:
                     self.maze.config.width * self.maze.config.height),
                 self.maze.config.width * self.maze.config.height
         )
+        self.pos_x, self.pos_y = self.maze.config.entry
+        self.game_won = False
 
     def draw_menu(self, color: int):
         pos_y = 5
@@ -174,15 +204,21 @@ class Renderer:
         menu_1 = "regenerate[W]"
         menu_2 = "path[s]"
         menu_3 = "color[D]"
-        menu_4 = "save[a]"
-        menu_5 = "exit[ECHAP]"
+        if self.play_mod:
+            menu_4 = "playMode[P][ON]"
+        else:
+            menu_4 = "playMode[P][OFF]"
+        menu_5 = "save[a]"
+        menu_6 = "exit[ECHAP]"
         self.text(pos_x, pos_y, color, menu_1)
         self.text(pos_x, pos_y + 20, color, menu_2)
         self.text(pos_x, pos_y + 40, color, menu_3)
         self.text(pos_x, pos_y + 60, color, menu_4)
         self.text(pos_x, pos_y + 80, color, menu_5)
+        self.text(pos_x, pos_y + 100, color, menu_6)
 
     def on_key_pressed(self, keycode: int, param: object):
+        print(keycode)
         if keycode == 119:
             self.draw_new_maze()
         if keycode == 115:
@@ -193,6 +229,17 @@ class Renderer:
             self.s['count'] += 1
         if keycode == 97:
             self.maze.save_maze()
+        if keycode == 65362:
+            self._try_move(0, -1)
+        if keycode == 65364:
+            self._try_move(0, 1)
+        if keycode == 65361:
+            self._try_move(-1, 0)
+        if keycode == 65363:
+            self._try_move(1, 0)
+        if keycode == 112:
+            self.play_mod = not self.play_mod
+            self.draw_rect((self.w - (int(self.w * 0.2))),5 ,100, 100, colors.MLX_BLACK)
         if keycode == 65307:
             self.mlx.mlx_loop_exit(self.mlx_ptr)
 
