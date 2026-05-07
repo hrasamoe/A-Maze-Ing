@@ -137,6 +137,57 @@ class MazeGenerator:
 
         if not self.config.perfect:
             self._crete_imperfect_way()
+    
+    def create_maze_with_dfs(
+                        self,
+                        animate: bool = False,
+                        delay: float = 0.02) -> None:
+        start_x: int = random.randint(0, self.config.width - 1)
+        start_y: int = random.randint(0, self.config.height - 1)
+        while self.grid[start_y][start_x].is_42:
+            start_x = random.randint(0, self.config.width - 1)
+            start_y = random.randint(0, self.config.height - 1)
+
+        self.grid[start_y][start_x].visited = True
+        stack: list[tuple[int, int]] = [(start_x, start_y)]
+
+        option: list[tuple[int, int, int, int]] = [
+            (0, -1, Cell.north, Cell.south),
+            (0, 1,  Cell.south, Cell.north),
+            (-1, 0, Cell.west,  Cell.east),
+            (1,  0, Cell.east,  Cell.west),
+        ]
+
+        while stack:
+            cx, cy = stack[-1]
+
+            # Cherche les voisins non visités
+            neighbors = []
+            for ox, oy, dir_out, dir_in in option:
+                tx, ty = cx + ox, cy + oy
+                if (0 <= tx < self.config.width
+                        and 0 <= ty < self.config.height):
+                    if (not self.grid[ty][tx].visited
+                            and not self.grid[ty][tx].is_42):
+                        neighbors.append((tx, ty, dir_out, dir_in))
+
+            if neighbors:
+                # Choisit un voisin aléatoire et avance (DFS)
+                nx, ny, dir_out, dir_in = random.choice(neighbors)
+                self.grid[cy][cx].remove_wall(dir_out)
+                self.grid[ny][nx].remove_wall(dir_in)
+                self.grid[ny][nx].visited = True
+                stack.append((nx, ny))
+            else:
+                # Backtrack
+                stack.pop()
+
+            if animate:
+                self.render_terminal()
+                time.sleep(delay)
+
+        if not self.config.perfect:
+            self._crete_imperfect_way()
 
     def solve_maze(self,
                    start_x: int, start_y: int,

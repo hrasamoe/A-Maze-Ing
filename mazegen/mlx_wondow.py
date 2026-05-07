@@ -183,10 +183,13 @@ class Renderer:
                     self._fill_rect(cx + cell_w - wall_t,
                                     cy, wall_t, cell_h, wall_color)
 
-    def draw_new_maze(self):
+    def draw_new_maze(self, algo: str = "BFS"):
         self.clear()
         self.maze = MazeGenerator(self.config_path)
-        self.maze.create_maze_with_bfs()
+        if algo == "BFS":
+            self.maze.create_maze_with_bfs()
+        else:
+            self.maze.create_maze_with_dfs()
         self.s['elapsed'] = 0.0
         self.s['t_last'] = time.time()
         self.s['reveal_order'] = random.sample(
@@ -201,7 +204,8 @@ class Renderer:
         pos_y = 5
         window_w = self.maze.config.window_w
         pos_x = window_w - (int(window_w * 0.2))
-        menu_1 = "newmaze[W]"
+        menu_1 = "BFS[W]"
+        menu_8 = "DFS[X]"
         menu_2 = "path[s]"
         menu_3 = "color[D]"
         menu_4 = "playMode:"
@@ -209,17 +213,20 @@ class Renderer:
         menu_6 = "save[a]"
         menu_7 = "exit[ECHAP]"
         self.text(pos_x, pos_y, color, menu_1)
-        self.text(pos_x, pos_y + 20, color, menu_2)
-        self.text(pos_x, pos_y + 40, color, menu_3)
-        self.text(pos_x, pos_y + 60, color, menu_4)
-        self.text(pos_x + 10, pos_y + 80, color, menu_5)
-        self.text(pos_x, pos_y + 100, color, menu_6)
-        self.text(pos_x, pos_y + 120, color, menu_7)
+        self.text(pos_x, pos_y + 20, color, menu_8)
+        self.text(pos_x, pos_y + 40, color, menu_2)
+        self.text(pos_x, pos_y + 60, color, menu_3)
+        self.text(pos_x, pos_y + 80, color, menu_4)
+        self.text(pos_x + 10, pos_y + 100, color, menu_5)
+        self.text(pos_x, pos_y + 120, color, menu_6)
+        self.text(pos_x, pos_y + 140, color, menu_7)
 
     def on_key_pressed(self, keycode: int, param: object):
         print(keycode)
         if keycode == 119:
-            self.draw_new_maze()
+            self.draw_new_maze("BFS")
+        if keycode == 120:
+            self.draw_new_maze("DFS")
         if keycode == 115:
             self.toggle_solution = not self.toggle_solution
         if keycode == 100:
@@ -238,7 +245,9 @@ class Renderer:
             self._try_move(1, 0)
         if keycode == 112:
             self.play_mod = not self.play_mod
-            self.draw_rect((self.w - (int(self.w * 0.2))), 5, 100, 100, colors.MLX_BLACK)
+            self.draw_rect(
+                        (self.w - (int(self.w * 0.2))),
+                        5, 100, 100, colors.MLX_BLACK)
         if keycode == 65307:
             self.mlx.mlx_loop_exit(self.mlx_ptr)
 
