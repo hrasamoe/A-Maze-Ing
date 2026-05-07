@@ -108,13 +108,13 @@ class Renderer:
                             player_pos=(self.pos_x, self.pos_y),
                             solution_mode=self.toggle_solution,
                             wall_color=self.wall_color)
+        self.flush()
         if self.game_won:
             cx = self.w // 2 - 50
             cy = self.h // 2
             self.flush()
             self.text(cx, cy, colors.MLX_GREEN, "YOU WIN! [W] to replay")
             return
-        self.flush()
 
     def render_terminal(
                 self,
@@ -201,21 +201,20 @@ class Renderer:
         pos_y = 5
         window_w = self.maze.config.window_w
         pos_x = window_w - (int(window_w * 0.2))
-        menu_1 = "regenerate[W]"
+        menu_1 = "newmaze[W]"
         menu_2 = "path[s]"
         menu_3 = "color[D]"
-        if self.play_mod:
-            menu_4 = "playMode[P][ON]"
-        else:
-            menu_4 = "playMode[P][OFF]"
-        menu_5 = "save[a]"
-        menu_6 = "exit[ECHAP]"
+        menu_4 = "playMode:"
+        menu_5 = "move[^v<>]"
+        menu_6 = "save[a]"
+        menu_7 = "exit[ECHAP]"
         self.text(pos_x, pos_y, color, menu_1)
         self.text(pos_x, pos_y + 20, color, menu_2)
         self.text(pos_x, pos_y + 40, color, menu_3)
         self.text(pos_x, pos_y + 60, color, menu_4)
-        self.text(pos_x, pos_y + 80, color, menu_5)
+        self.text(pos_x + 10, pos_y + 80, color, menu_5)
         self.text(pos_x, pos_y + 100, color, menu_6)
+        self.text(pos_x, pos_y + 120, color, menu_7)
 
     def on_key_pressed(self, keycode: int, param: object):
         print(keycode)
@@ -239,7 +238,7 @@ class Renderer:
             self._try_move(1, 0)
         if keycode == 112:
             self.play_mod = not self.play_mod
-            self.draw_rect((self.w - (int(self.w * 0.2))),5 ,100, 100, colors.MLX_BLACK)
+            self.draw_rect((self.w - (int(self.w * 0.2))), 5, 100, 100, colors.MLX_BLACK)
         if keycode == 65307:
             self.mlx.mlx_loop_exit(self.mlx_ptr)
 
