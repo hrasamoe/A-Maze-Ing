@@ -112,7 +112,7 @@ class Renderer:
         if self.game_won:
             cx = self.w // 2 - 200
             cy = self.h // 2
-            self.draw_rect(cx, cy, 250, 100, colors.MLX_YELLOW)
+            self.draw_rect(cx, cy, 300, 100, colors.MLX_YELLOW)
             self.flush()
             self.text(
                     cx + 13, cy + 30,
