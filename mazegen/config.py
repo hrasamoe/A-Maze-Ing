@@ -77,8 +77,14 @@ class MazeConfig:
         self.logic_chek()
         self.width = self.property.width
         self.height = self.property.height
-        self.window_w = self.property.window_w
-        self.window_h = self.property.window_h
+        if self.property.window_w <= 800:
+            self.window_w = 800
+        else:
+            self.window_w = self.property.window_w
+        if self.property.window_h <= 600:
+            self.window_h = 600
+        else:
+            self.window_h = self.property.window_h
         self.entry = self.property.entry
         self.exit = self.property.exit
         self.output_file = self.property.output_file
