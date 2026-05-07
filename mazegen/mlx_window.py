@@ -30,12 +30,12 @@ class Renderer:
         self.bpp = self.bpp // 8
         total = self.maze.config.width * self.maze.config.height
         self.s: dict = {
-                't_last':  time.time(),  # timestamp de la dernière frame
-                'elapsed': 0.0,           # temps total écoulé en secondes
-                'x':       0,  # position X du centre du carré
-                'y':       0,  # position Y
-                'vx':      200.0,         # vitesse X en pixels / seconde
-                'vy':      150.0,         # vitesse Y en pixels / seconde
+                't_last':  time.time(),
+                'elapsed': 0.0,
+                'x':       0,
+                'y':       0,
+                'vx':      200.0,
+                'vy':      150.0,
                 'angle':   0.0,
                 'count': 0,
                 'reveal_order': random.sample(range(total), total)
