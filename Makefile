@@ -8,10 +8,6 @@ STAMP = $(VENV)/.installed
 $(VENV)/bin/activate:
 	python3 -m venv $(VENV)
 
-# $(STAMP): $(VENV)/bin/activate pyproject.toml
-# 	$(PIP) install --upgrade pip build wheel flake8 mypy pydantic types-setuptools
-# 	$(PIP) install -e .
-# 	touch $(STAMP)
 $(STAMP): $(VENV)/bin/activate pyproject.toml
 	$(PIP) install --upgrade pip build wheel flake8 mypy pydantic types-setuptools
 	$(PIP) install mlx-2.2-py3-none-any.whl
