@@ -222,7 +222,6 @@ class Renderer:
         self.text(pos_x, pos_y + 140, color, menu_7)
 
     def on_key_pressed(self, keycode: int, param: object):
-        print(keycode)
         if keycode == 119:
             self.draw_new_maze("BFS")
         if keycode == 120:

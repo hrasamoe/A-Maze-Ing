@@ -11,6 +11,7 @@ $(VENV)/bin/activate:
 $(STAMP): $(VENV)/bin/activate pyproject.toml
 	$(PIP) install --upgrade pip build wheel flake8 mypy pydantic types-setuptools
 	$(PIP) install mlx-2.2-py3-none-any.whl
+	$(PIP) install mazegen-1.0.0-py3-none-any.whl
 	$(PIP) install -e .
 	touch $(STAMP)
 

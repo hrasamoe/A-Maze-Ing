@@ -1,6 +1,6 @@
 from mazegen.generator import MazeGenerator
 from mazegen import colors
-from mazegen.mlx_wondow import Renderer
+from mazegen.mlx_window import Renderer
 import sys
 
 
