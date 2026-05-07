@@ -1,4 +1,5 @@
-from pydantic import BaseModel, Field, Any, ValidationError
+from typing import Any
+from pydantic import BaseModel, Field, ValidationError
 
 
 class MazeProperty(BaseModel):
@@ -12,7 +13,9 @@ class MazeProperty(BaseModel):
     exit: tuple[int, int]
     output_file: str = Field(default="maze_output.txt", min_length=2)
     perfect: bool = Field(default=True)
-    seed: int = Field(default=78)
+    seed: int | None = Field(default=None)
+    window_w: int = 800
+    window_h: int = 600
 
 
 class MazeConfig:
@@ -24,7 +27,7 @@ class MazeConfig:
             self.property = MazeProperty(**raw_data)
         except ValidationError as e:
             occured_error = []
-            for err in e.error():
+            for err in e.errors():
                 field_name = str(err.get('loc')[0]).upper()
                 error_type = err.get("type")
                 if error_type == "missing":
@@ -74,6 +77,14 @@ class MazeConfig:
         self.logic_chek()
         self.width = self.property.width
         self.height = self.property.height
+        if self.property.window_w <= 800:
+            self.window_w = 800
+        else:
+            self.window_w = self.property.window_w
+        if self.property.window_h <= 600:
+            self.window_h = 600
+        else:
+            self.window_h = self.property.window_h
         self.entry = self.property.entry
         self.exit = self.property.exit
         self.output_file = self.property.output_file
@@ -111,7 +122,7 @@ class MazeConfig:
                                 "ENTRY/EXIT = x,y "
                             )
                     else:
-                        data[key.lower] = value
+                        data[key.lower()] = value
             return data
         except OSError as e:
             raise OSError(f"[ERROR PARSING FILE CONFIG]: {e}")
@@ -119,10 +130,10 @@ class MazeConfig:
     def logic_chek(self,) -> None:
         if self.property.entry == self.property.exit:
             raise ValueError("Entry and Exit coordinates cannot be identical")
-        x1, y2 = self.property.entry
+        x1, y1 = self.property.entry
         x2, y2 = self.property.exit
         if not (0 <= x1 < self.property.width
-                and 0 <= y2 < self.property.height):
+                and 0 <= y1 < self.property.height):
             raise ValueError(f"Entry {self.property.entry} is out of bounds")
         if not (0 <= x2 < self.property.width
                 and 0 <= y2 < self.property.height):
