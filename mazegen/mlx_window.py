@@ -110,10 +110,13 @@ class Renderer:
                             wall_color=self.wall_color)
         self.flush()
         if self.game_won:
-            cx = self.w // 2 - 50
+            cx = self.w // 2 - 200
             cy = self.h // 2
+            self.draw_rect(cx, cy, 250, 100, colors.MLX_YELLOW)
             self.flush()
-            self.text(cx, cy, colors.MLX_GREEN, "YOU WIN! [W] to replay")
+            self.text(
+                    cx + 13, cy + 30,
+                    colors.MLX_RED, "YOU WIN! [W]/[X] to replay")
             return
 
     def render_terminal(
