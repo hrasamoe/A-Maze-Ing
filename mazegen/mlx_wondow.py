@@ -106,8 +106,9 @@ class Renderer:
         solution: set[tuple[int, int]] = set()
         window_w = self.maze.config.window_w
         window_h = self.maze.config.window_h
-        cell_w: int = window_w // self.maze.config.width
-        cell_h: int = (window_h - 20) // self.maze.config.height
+        temp_cell_w = self.maze.config.width
+        cell_w: int = (window_w - (int(window_w * 0.2))) // temp_cell_w
+        cell_h: int = window_h // self.maze.config.height
         wall_t: int = max(2, min(cell_w, cell_h) // 8)
         if solution_mode:
             path_str = self.maze.solve_maze(px, py, ex, ey)
@@ -167,18 +168,19 @@ class Renderer:
         )
 
     def draw_menu(self, color: int):
-        pos_y = self.maze.config.window_h - 20
-        pos_x = 10
+        pos_y = 5
+        window_w = self.maze.config.window_w
+        pos_x = window_w - (int(window_w * 0.2))
         menu_1 = "regenerate[W]"
         menu_2 = "path[s]"
         menu_3 = "color[D]"
         menu_4 = "save[a]"
         menu_5 = "exit[ECHAP]"
         self.text(pos_x, pos_y, color, menu_1)
-        self.text(pos_x + 140, pos_y, color, menu_2)
-        self.text(pos_x + 220, pos_y, color, menu_3)
-        self.text(pos_x + 310, pos_y, color, menu_4)
-        self.text(pos_x + 440, pos_y, color, menu_5)
+        self.text(pos_x, pos_y + 20, color, menu_2)
+        self.text(pos_x, pos_y + 40, color, menu_3)
+        self.text(pos_x, pos_y + 60, color, menu_4)
+        self.text(pos_x, pos_y + 80, color, menu_5)
 
     def on_key_pressed(self, keycode: int, param: object):
         if keycode == 119:
@@ -199,7 +201,6 @@ class Renderer:
 
     def run(self) -> None:
         try:
-
             self.maze._embed_42_pattern()
             self.draw_new_maze()
             self.flush()
