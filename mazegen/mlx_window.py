@@ -160,7 +160,6 @@ class Renderer:
                                 cx, cy, cell_w, cell_h,
                                 pulse << 16 | pulse << 8 | pulse)
                     continue
-                # Fond
                 if (x, y) == (px, py):
                     bg = colors.MLX_RED
                 elif (x, y) == self.maze.config.entry:
@@ -174,7 +173,6 @@ class Renderer:
                 else:
                     bg = colors.MLX_BLACK
                 self._fill_rect(cx, cy, cell_w, cell_h, bg)
-                # Murs
                 if cell.has_wall(Cell.north):
                     self._fill_rect(cx, cy, cell_w, wall_t, wall_color)
                 if cell.has_wall(Cell.south):
