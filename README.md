@@ -1,10 +1,5 @@
 _This project has been created as part of the 42 curriculum by hrasamoe, ny-araza_
 
-#  A-MAZE-ING
-
-> Maze solving algorithm using Breadth First Search (BFS) and Deaph First Search (DFS) to find the shortest path through a maze.
-
----
 
 #  DESCRIPTION
 
@@ -13,7 +8,7 @@ This project use MLX for rendering maze and for interaction with the user.
 
 ---
 
-# STRUCTURE OF CONFIG FILE
+### STRUCTURE OF CONFIG FILE
 
 <div>
   <table>
@@ -136,9 +131,13 @@ make lint-strict
 # Launch the program
 make run
 
-# clean the workflow
+# Build the package
+make build
+
+# clean the workflow, remove the cache of mypy and flake8
 make clean
 
+#remove the cache and venv on the project
 make fclean
 ```
 
@@ -167,10 +166,16 @@ Claude was used to expalin how to init **MLX** and use animation
 
 #  ALGORITHM EXPLANATION
 
-Bearth-First Search (BFS) is a graph traversal algorithm that explores all vertices at the present depth level before moving to vertices at the next depth level. This ensures finding the **shortest path** in an unweighted maze.
+We use pydantic because it used for data validation and data parsing using Python type hints. It ensures that data structures like classes, dictionaries or API inputs contain valid and correctly typed data before being processed. Pydantic automatically converts and validates incoming data, helping developers write cleaner, more reliable code.
+
+#### BFS Algorithm
+
+A Breadth-First Search (BFS) generator on a maze creates a grid of paths by expanding outward from a starting point, exploring all neighboring cells at the current distance before moving further away. Using a Queue (FIFO - First-In-First-Out), the algorithm ensures that the maze is generated in a uniform, "bushy" manner
 ```
 Start → [Queue] → Explore neighbors level by level → Goal 
 ```
+#### BFS Algorithm
+
 Depth-First Search (DFS) is a graph traversal algorithm that explores a path as far as possible before backtracking.
 It starts at a starting vertex, visits an unexplored neighbor, and then continues moving from neighbor to neighbor.
 When it reaches a vertex with no unvisited neighbors, it returns to the previous vertex to explore other possible paths.
@@ -201,8 +206,7 @@ We use BFS and DSF because its the most popular alogirthme of searching path und
               src="https://cdn.intra.42.fr/users/824236a35151d016d755597d924388e6/hrasamoe.jpg" 
               alt="hrasamoe" 
               width="83"
-              height="80"
-              style="border: 2px solid #4a90e2; border-radius: 50%; box-shadow: 4px 4px 12px rgba(0,0,0,0.2);"
+              style="border: 2px solid #4a90e2; border-radius: 10%; box-shadow: 4px 4px 12px rgba(0,0,0,0.2);"
             /><br/>
             <strong>hrasamoe</strong>
           </td>
@@ -219,8 +223,7 @@ We use BFS and DSF because its the most popular alogirthme of searching path und
               src="https://cdn.intra.42.fr/users/777c5c8ffe9379d1469c7bd695d90615/ny-araza.jpg" 
               alt="ny-araza" 
                           width="83"
-              height="80"
-              style="border: 2px solid #4a90e2; border-radius: 50%; box-shadow: 4px 4px 12px rgba(0,0,0,0.2);"
+              style="border: 2px solid #4a90e2; border-radius: 10%; box-shadow: 4px 4px 12px rgba(0,0,0,0.2);"
            /><br/>
             <strong>ny-araza</strong>
           </td>
