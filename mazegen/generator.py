@@ -77,7 +77,8 @@ class MazeGenerator:
                         random.shuffle(options)
                         for dx, dy, dir_out, next_dir_in in options:
                             tx, ty = x + dx, y + dy
-                            if ty < self.config.height and tx < self.config.width: 
+                            if ty < self.config.height and \
+                                    tx < self.config.width:
                                 if not self.grid[ty][tx].is_42:
                                     cell.remove_wall(dir_out)
                                     self.grid[ty][tx].remove_wall(next_dir_in)
