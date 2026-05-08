@@ -62,12 +62,12 @@ Claude was used to explain more details for our chosen algorithm and sometimes w
 BFS is a graph traversal algorithm that explores all vertices at the present depth level before moving to vertices at the next depth level. This ensures finding the **shortest path** in an unweighted maze.
 
 ```
-Start → [Queue] → Explore neighbors level by level → Goal ✅
+Start → [Queue] → Explore neighbors level by level → Goal 
 ```
 
 ---
 
-# 👥 CONTRIBUTIONS
+# CONTRIBUTIONS
 
 
 <table>
@@ -85,7 +85,7 @@ Start → [Queue] → Explore neighbors level by level → Goal ✅
             <strong>hrasamoe</strong>
           </td>
           <td valign="middle" style="padding-left: 20px;">
-            🗺️ <strong>hrasamoe</strong> — BFS algorithm implementation & maze parser
+            <strong>hrasamoe</strong> — BFS algorithm implementation & maze parser
           </td>
         </tr>
         <tr>
@@ -99,7 +99,7 @@ Start → [Queue] → Explore neighbors level by level → Goal ✅
             <strong>ny-araza</strong>
           </td>
           <td valign="middle" style="padding-left: 20px;">
-            🎨 <strong>ny-araza</strong> — MLX rendering & visual path display
+             <strong>ny-araza</strong> — MLX rendering & visual path display
           </td>
         </tr>
       </table>

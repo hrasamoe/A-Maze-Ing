@@ -55,10 +55,8 @@ class MazeGenerator:
         for y in range(self.config.height):
             for x in range(self.config.width):
                 cell = self.grid[y][x]
-
                 if cell.is_42:
                     continue
-
                 closed_walls = sum([
                     cell.has_wall(Cell.north),
                     cell.has_wall(Cell.east),
