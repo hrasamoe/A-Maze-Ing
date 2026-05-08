@@ -1,6 +1,15 @@
-## GENERATE THE MAZEGEN PACKAGE 
-**pip install build --break-system-packages**  
-**python -m build --wheel**  
-**le fichier apparait dans dist/*.whl**  
-#### Install the package
-**pip install mazegen*.whl **
+_This project has been created as part of the 42 curriculum by hrasamoe, ny-araza_
+
+# DESCRIPTION
+
+# INSTRUCTION
+
+# RESOURCES
+
+## AI USAGE
+
+# USAGE
+
+# ALGORITHM EXPLANATION
+
+# CONTRIBUTIONS
