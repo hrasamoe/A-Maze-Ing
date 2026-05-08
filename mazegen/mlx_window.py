@@ -130,7 +130,7 @@ class Renderer:
         self.s['t_last'] = now
         self.s['elapsed'] += dt
         total_cells = self.maze.config.width * self.maze.config.height
-        reveal_speed = 150  # cellules révélées par seconde
+        reveal_speed = 150
         revealed = min(int(self.s['elapsed'] * reveal_speed), total_cells)
         revealed_set = set(self.s['reveal_order'][:revealed])
         self.clear()

@@ -2,7 +2,6 @@ from .config import MazeConfig
 from .cell import Cell
 import random
 import sys
-import time
 
 
 class MazeGenerator:
@@ -83,10 +82,7 @@ class MazeGenerator:
                                 self.grid[ty][tx].remove_wall(next_dir_in)
                                 break
 
-    def create_maze_with_bfs(
-                                self,
-                                animate: bool = False,
-                                delay: float = 0.02) -> None:
+    def create_maze_with_bfs(self) -> None:
         start_x: int = random.randint(0, self.config.width - 1)
         start_y: int = random.randint(0, self.config.height - 1)
         while self.grid[start_y][start_x].is_42:
@@ -127,17 +123,11 @@ class MazeGenerator:
                 self.grid[dy][dx].remove_wall(dir_out)
                 self.grid[ny][nx].remove_wall(nex_dir_in)
             add_frontier(dx, dy)
-            if animate:
-                self.render_terminal()
-                time.sleep(delay)
 
         if not self.config.perfect:
             self._crete_imperfect_way()
 
-    def create_maze_with_dfs(
-                        self,
-                        animate: bool = False,
-                        delay: float = 0.02) -> None:
+    def create_maze_with_dfs(self,) -> None:
         start_x: int = random.randint(0, self.config.width - 1)
         start_y: int = random.randint(0, self.config.height - 1)
         while self.grid[start_y][start_x].is_42:
@@ -169,15 +159,13 @@ class MazeGenerator:
                 stack.append((nx, ny))
             else:
                 stack.pop()
-            if animate:
-                self.render_terminal()
-                time.sleep(delay)
         if not self.config.perfect:
             self._crete_imperfect_way()
 
-    def solve_maze(self,
-                   start_x: int, start_y: int,
-                   end_x: int, end_y: int) -> str:
+    def solve_maze(
+                    self,
+                    start_x: int, start_y: int,
+                    end_x: int, end_y: int) -> str:
         visited: set[tuple[int, int]] = set()
         visited.add((start_x, start_y))
         queue: list[tuple[int, int, str]] = [(start_x, start_y, "")]

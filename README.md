@@ -183,13 +183,12 @@ This process continues until all reachable vertices have been visited or until a
 ```
 Start → Explore neighbors level by level → if not find neighbors -> return previews visited and find another path -> Goal 
 ```
-**Reusable code**  
-the maza generator is the code that be reusable _mazegen.*.py_  . because its a class and can be export as a package.whl tha can be import 
+**Revised Justification**
+The maze generator is implemented as a reusable class in mazegen.*.py. It is designed to be exported as a .whl package, allowing it to be easily imported into other projects.
 
-**Justification of choosen algorithm**   
-We use BFS and DSF because its the most popular alogirthme of searching path under graph. And its easy to learn.
+**Algorithm Choice:**
+We utilize Breadth-First Search (BFS) and Depth-First Search (DFS) as they are the standard algorithms for graph traversal and pathfinding. Their popularity and logical simplicity make the codebase both efficient and accessible for educational purposes.
 
----
 
 
 
