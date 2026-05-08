@@ -6,6 +6,7 @@ import random
 import ctypes
 import time
 import math
+from typing import Any
 
 
 class Renderer:
@@ -29,15 +30,15 @@ class Renderer:
             self.mlx.mlx_get_data_addr(self.img)
         self.bpp = self.bpp // 8
         total = self.maze.config.width * self.maze.config.height
-        self.s: dict = {
+        self.s: dict[str, Any] = {
                 't_last':  time.time(),
                 'elapsed': 0.0,
-                'x':       0,
-                'y':       0,
+                'x':       0.0,
+                'y':       0.0,
                 'vx':      200.0,
                 'vy':      150.0,
                 'angle':   0.0,
-                'count': 0,
+                'count': 0.0,
                 'reveal_order': random.sample(range(total), total)
                 }
         self.wall_color = colors.MLX_WHITE
@@ -186,7 +187,7 @@ class Renderer:
                     self._fill_rect(cx + cell_w - wall_t,
                                     cy, wall_t, cell_h, wall_color)
 
-    def draw_new_maze(self, algo: str = "BFS"):
+    def draw_new_maze(self, algo: str = "BFS") -> None:
         self.clear()
         self.maze = MazeGenerator(self.config_path)
         if algo == "BFS":
@@ -203,7 +204,7 @@ class Renderer:
         self.pos_x, self.pos_y = self.maze.config.entry
         self.game_won = False
 
-    def draw_menu(self, color: int):
+    def draw_menu(self, color: int) -> None:
         pos_y = 5
         window_w = self.maze.config.window_w
         pos_x = window_w - (int(window_w * 0.2))
@@ -224,7 +225,7 @@ class Renderer:
         self.text(pos_x, pos_y + 120, color, menu_6)
         self.text(pos_x, pos_y + 140, color, menu_7)
 
-    def on_key_pressed(self, keycode: int, param: object):
+    def on_key_pressed(self, keycode: int, param: object) -> None:
         if keycode == 119:
             self.draw_new_maze("BFS")
         if keycode == 120:
