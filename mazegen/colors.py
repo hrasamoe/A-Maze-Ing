@@ -1,11 +1,3 @@
-RESET: str = "\033[0m"
-BLACK: str = "\033[30m"
-RED: str = "\033[31m"
-YELLOW: str = "\033[33m"
-BLUE: str = "\033[34m"
-MAGENTA: str = "\033[35m"
-CYAN: str = "\033[36m"
-WHITE: str = "\033[37m"
 
 MLX_RED: int = 0xFFFF0000
 MLX_GREEN: int = 0xFF00FF00
@@ -17,7 +9,5 @@ MLX_CYAN: int = 0xFF00FFFF
 MLX_PURPLE: int = 0xFF7C6AF7
 MLX_ORANGE: int = 0xFFFF8C00
 
-
-COLOR_PALETTE: list[str] = [WHITE, RED, YELLOW, BLUE, MAGENTA, CYAN]
 MLX_COLOR_PALETTE: list[int] = [MLX_RED, MLX_BLUE, MLX_WHITE, MLX_YELLOW,
                                 MLX_CYAN, MLX_PURPLE, MLX_ORANGE]

@@ -1,8 +1,6 @@
 from .config import MazeConfig
 from .cell import Cell
-from mazegen import colors
 import random
-import os
 import sys
 import time
 
