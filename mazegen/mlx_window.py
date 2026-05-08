@@ -18,10 +18,10 @@ class Renderer:
         self.w: int = self.maze.config.window_w
         self.h: int = self.maze.config.window_h
         self.mlx: Mlx = Mlx()
-        self.mlx_ptr: ctypes.c_void_p = self.mlx.mlx_init()
-        self.win: ctypes.c_void_p = self.mlx.mlx_new_window(
-            self.mlx_ptr, self.w, self.h, "Formes")
-        self.img: ctypes.c_void_p = self.mlx.mlx_new_image(
+        self.mlx_ptr = self.mlx.mlx_init()
+        self.win = self.mlx.mlx_new_window(
+            self.mlx_ptr, self.w, self.h, "A-Maze-ing")
+        self.img = self.mlx.mlx_new_image(
             self.mlx_ptr, self.w, self.h)
         self.data: memoryview
         self.bpp: int
