@@ -22,18 +22,18 @@ run: install
 
 build: install
 	$(PYTHON) -m build --sdist --wheel --outdir .
-	@echo "\n[i] Package built! Files ate in the root directory"
+	@echo "\n[i] Package built! Files are in the root directory"
 
 debug: install
 	$(PYTHON) -m pdb a_maze_ing.py config.txt
 
 lint: install
-	$(FLAKE8) . --exclude $(VENV)
-	$(MYPY) . --exclude $(VENV)
+	$(FLAKE8) . --exclude=$(VENV),mazegen/__init__.py
+	$(MYPY) . --exclude $(VENV) --exclude build
 
 lint-strict: install
-	$(FLAKE8) . --exclude $(VENV)
-	$(MYPY) . --exclude $(VENV) --strict
+	$(FLAKE8) . --exclude=$(VENV),mazegen/__init__.py
+	$(MYPY) . --exclude $(VENV) --exclude build --strict
 
 clean:
 	rm -rf __pycache__ mazegen/__pycache__
