@@ -77,10 +77,11 @@ class MazeGenerator:
                         random.shuffle(options)
                         for dx, dy, dir_out, next_dir_in in options:
                             tx, ty = x + dx, y + dy
-                            if not self.grid[ty][tx].is_42:
-                                cell.remove_wall(dir_out)
-                                self.grid[ty][tx].remove_wall(next_dir_in)
-                                break
+                            if ty < self.config.height and tx < self.config.width: 
+                                if not self.grid[ty][tx].is_42:
+                                    cell.remove_wall(dir_out)
+                                    self.grid[ty][tx].remove_wall(next_dir_in)
+                                    break
 
     def create_maze_with_bfs(self) -> None:
         start_x: int = random.randint(0, self.config.width - 1)
@@ -190,7 +191,6 @@ class MazeGenerator:
     def _get_path_coords(
         self, start_x: int, start_y: int, path_str: str
     ) -> set[tuple[int, int]]:
-        """Converts directional string ('NESW') into coords (X, Y)."""
         coords: set[tuple[int, int]] = set()
         cx, cy = start_x, start_y
         for move in path_str:

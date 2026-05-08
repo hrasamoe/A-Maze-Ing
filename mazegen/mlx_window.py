@@ -105,7 +105,7 @@ class Renderer:
             self.mlx_ptr, self.win, self.img, 0, 0)
 
     def _loop(self, data: object) -> None:
-        self.render_terminal(
+        self.render_mlx(
                             player_pos=(self.pos_x, self.pos_y),
                             solution_mode=self.toggle_solution,
                             wall_color=self.wall_color)
@@ -120,7 +120,7 @@ class Renderer:
                     colors.MLX_RED, "YOU WIN! [W]/[X] to replay")
             return
 
-    def render_terminal(
+    def render_mlx(
                 self,
                 player_pos: tuple[int, int] | None = None,
                 solution_mode: bool = False,
@@ -252,21 +252,21 @@ class Renderer:
         if keycode == 65307:
             self.mlx.mlx_loop_exit(self.mlx_ptr)
 
-    def close(self, para: object) -> None:
+    def close(self, param: object) -> None:
         self.mlx.mlx_loop_exit(self.mlx_ptr), None
 
     def run(self) -> None:
-        try:
-            self.maze._embed_42_pattern()
-            self.draw_new_maze()
-            self.flush()
-            self.draw_menu(colors.MLX_WHITE)
-            self.mlx.mlx_loop_hook(self.mlx_ptr, self._loop, None)
-            self.mlx.mlx_key_hook(self.win, self.on_key_pressed, None)
-            self.mlx.mlx_hook(self.win, 33, 0, self.close, None)
-            self.mlx.mlx_loop(self.mlx_ptr)
-        except Exception as e:
-            print(f"An error occured : {e}")
-        finally:
-            self.mlx.mlx_destroy_window(self.mlx_ptr, self.win)
-            self.mlx.mlx_release(self.mlx_ptr)
+        # try:
+        self.maze._embed_42_pattern()
+        self.draw_new_maze()
+        self.flush()
+        self.draw_menu(colors.MLX_WHITE)
+        self.mlx.mlx_loop_hook(self.mlx_ptr, self._loop, None)
+        self.mlx.mlx_key_hook(self.win, self.on_key_pressed, None)
+        self.mlx.mlx_hook(self.win, 33, 0, self.close, None)
+        self.mlx.mlx_loop(self.mlx_ptr)
+        # except Exception as e:
+        #     print(f"An error occured : {e}")
+        # finally:
+        #     self.mlx.mlx_destroy_window(self.mlx_ptr, self.win)
+        #     self.mlx.mlx_release(self.mlx_ptr)

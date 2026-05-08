@@ -5,4 +5,4 @@ WINDOW_H=1000
 ENTRY=5,6
 EXIT=28, 15
 OUTPUT_FILE=maze_output.txt
-PERFECT=True
+PERFECT=False
