@@ -3,6 +3,7 @@ from mazegen import colors
 from mazegen.cell import Cell
 from mazegen.generator import MazeGenerator
 import random
+import ctypes
 import time
 import math
 from typing import Any
@@ -17,10 +18,10 @@ class Renderer:
         self.w: int = self.maze.config.window_w
         self.h: int = self.maze.config.window_h
         self.mlx: Mlx = Mlx()
-        self.mlx_ptr = self.mlx.mlx_init()
-        self.win = self.mlx.mlx_new_window(
-            self.mlx_ptr, self.w, self.h, "A-Maze-ing")
-        self.img = self.mlx.mlx_new_image(
+        self.mlx_ptr: ctypes.c_void_p = self.mlx.mlx_init()
+        self.win: ctypes.c_void_p = self.mlx.mlx_new_window(
+            self.mlx_ptr, self.w, self.h, "A-Maze-Ing")
+        self.img: ctypes.c_void_p = self.mlx.mlx_new_image(
             self.mlx_ptr, self.w, self.h)
         self.data: memoryview
         self.bpp: int
@@ -37,7 +38,7 @@ class Renderer:
                 'vx':      200.0,
                 'vy':      150.0,
                 'angle':   0.0,
-                'count': 0.0,
+                'count': 0,
                 'reveal_order': random.sample(range(total), total)
                 }
         self.wall_color = colors.MLX_WHITE
