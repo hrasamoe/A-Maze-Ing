@@ -3,7 +3,6 @@ from mazegen import colors
 from mazegen.cell import Cell
 from mazegen.generator import MazeGenerator
 import random
-import ctypes
 import time
 import math
 from typing import Any

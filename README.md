@@ -200,13 +200,17 @@ We use BFS and DSF because its the most popular alogirthme of searching path und
             <img 
               src="https://cdn.intra.42.fr/users/824236a35151d016d755597d924388e6/hrasamoe.jpg" 
               alt="hrasamoe" 
-              width="100"
-              style="border: 2px solid #4a90e2; border-radius: 12px; box-shadow: 4px 4px 12px rgba(0,0,0,0.2);"
+              width="83"
+              height="80"
+              style="border: 2px solid #4a90e2; border-radius: 50%; box-shadow: 4px 4px 12px rgba(0,0,0,0.2);"
             /><br/>
             <strong>hrasamoe</strong>
           </td>
           <td valign="middle" style="padding-left: 20px;">
-            <strong>hrasamoe</strong> — BFS algorithm implementation & maze parser
+            <strong>BFS algorithm implementation & maze parser</strong><br/>
+            <strong>Solve the Maze with BFS and get the path of it</strong><br/>
+            <strong>Output the maze, the config and solution path on a file</strong><br/>
+            <strong></strong>
           </td>
         </tr>
         <tr>
@@ -214,13 +218,16 @@ We use BFS and DSF because its the most popular alogirthme of searching path und
             <img 
               src="https://cdn.intra.42.fr/users/777c5c8ffe9379d1469c7bd695d90615/ny-araza.jpg" 
               alt="ny-araza" 
-              width="100"
-              style="border: 2px solid #4a90e2; border-radius: 12px; box-shadow: 4px 4px 12px rgba(0,0,0,0.2);"
-            /><br/>
+                          width="83"
+              height="80"
+              style="border: 2px solid #4a90e2; border-radius: 50%; box-shadow: 4px 4px 12px rgba(0,0,0,0.2);"
+           /><br/>
             <strong>ny-araza</strong>
           </td>
           <td valign="middle" style="padding-left: 20px;">
-             <strong>ny-araza</strong> — MLX rendering & visual path display & BFS algorithm
+             <strong>DFS algorithm implementation</strong><br/>
+             <strong>Play Mode integration</strong><br/>
+             <strong>Create the window with MLX and provide the visual render on it</strong>
           </td>
         </tr>
       </table>
