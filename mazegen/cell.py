@@ -1,8 +1,8 @@
 class Cell:
-    north: int = 8
-    east: int = 4
-    south: int = 2
-    west: int = 1
+    north: int = 1
+    east: int = 2
+    south: int = 4
+    west: int = 8
 
     def __init__(self, x: int, y: int) -> None:
         self.x: int = x
