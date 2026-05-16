@@ -1,5 +1,7 @@
 from typing import Any
 from pydantic import BaseModel, Field, ValidationError
+import os
+import stat
 
 
 class MazeProperty(BaseModel):
@@ -94,6 +96,11 @@ class MazeConfig:
     def read_file(self, filepath: str) -> dict[str, Any]:
         data: dict[str, Any] = {}
         try:
+            if os.path.exists(filepath):
+                actual_status = os.stat(filepath).st_mode
+                all_read_rigth = stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH
+                if (actual_status & all_read_rigth) != all_read_rigth:
+                    os.chmod(filepath, actual_status | all_read_rigth)
             with open(filepath, 'r') as fd:
                 for line in fd:
                     line = line.strip()
