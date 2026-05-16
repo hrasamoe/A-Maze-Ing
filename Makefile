@@ -39,7 +39,6 @@ clean:
 	rm -rf __pycache__ mazegen/__pycache__
 	rm -rf *.egg-info build dist .mypy_cache
 	rm -rf maze_output.txt
-	rm -rf mazegen-*.whl mazegen-*tar.gz
 
 fclean: clean
 	rm -rf $(VENV)
