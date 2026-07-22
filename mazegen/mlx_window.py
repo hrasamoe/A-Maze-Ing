@@ -3,7 +3,6 @@ from mazegen import colors
 from mazegen.cell import Cell
 from mazegen.generator import MazeGenerator
 import random
-import ctypes
 import time
 import math
 from typing import Any
@@ -15,14 +14,14 @@ class Renderer:
                 config_path: str = "config.txt") -> None:
         self.maze: MazeGenerator = MazeGenerator(config_path)
         self.config_path = config_path
-        self.w: int = self.maze.config.window_w
-        self.h: int = self.maze.config.window_h
         self.mlx: Mlx = Mlx()
-        self.mlx_ptr: ctypes.c_void_p = self.mlx.mlx_init()
-        self.win: ctypes.c_void_p = self.mlx.mlx_new_window(
-            self.mlx_ptr, self.w, self.h, "A-Maze-Ing")
-        self.img: ctypes.c_void_p = self.mlx.mlx_new_image(
-            self.mlx_ptr, self.w, self.h)
+        self.mlx_ptr = self.mlx.mlx_init()
+        self.win = self.mlx.mlx_new_window(
+            self.mlx_ptr, self.maze.config.window_w,
+            self.maze.config.window_h, "A-Maze-Ing")
+        self.img = self.mlx.mlx_new_image(
+            self.mlx_ptr, self.maze.config.window_w,
+            self.maze.config.window_h)
         self.data: memoryview
         self.bpp: int
         self.sl: int
@@ -33,10 +32,6 @@ class Renderer:
         self.s: dict[str, Any] = {
                 't_last':  time.time(),
                 'elapsed': 0.0,
-                'x':       0.0,
-                'y':       0.0,
-                'vx':      200.0,
-                'vy':      150.0,
                 'angle':   0.0,
                 'count': 0,
                 'reveal_order': random.sample(range(total), total)
@@ -48,7 +43,8 @@ class Renderer:
         self.play_mod = False
 
     def put_pixel(self, x: int, y: int, color: int) -> None:
-        if 0 <= x < self.w and 0 <= y < self.h:
+        if 0 <= x < self.maze.config.window_w and \
+                0 <= y < self.maze.config.window_h:
             off: int = y * self.sl + x * (self.bpp)
             self.data[off:off+self.bpp] = color.to_bytes(self.bpp, 'little')
 
@@ -95,7 +91,7 @@ class Renderer:
             self.data[off:off + w * self.bpp] = row_bytes
 
     def clear(self) -> None:
-        self.data[0:self.sl * self.h] = b'\x00' * (self.sl * self.h)
+        self.data[0:self.sl * self.maze.config.window_w] = b'\x00' * (self.sl * self.maze.config.window_h)
 
     def text(self, x: int, y: int, color: int, s: str) -> None:
         self.mlx.mlx_string_put(self.mlx_ptr, self.win, x, y, color, s)
@@ -111,8 +107,8 @@ class Renderer:
                             wall_color=self.wall_color)
         self.flush()
         if self.game_won:
-            cx = self.w // 2 - 200
-            cy = self.h // 2
+            cx = self.maze.config.window_w // 2 - 200
+            cy = self.maze.config.window_h // 2
             self.draw_rect(cx, cy, 300, 100, colors.MLX_YELLOW)
             self.flush()
             self.text(
@@ -247,7 +243,7 @@ class Renderer:
         if keycode == 112:
             self.play_mod = not self.play_mod
             self.draw_rect(
-                        (self.w - (int(self.w * 0.2))),
+                        (self.maze.config.window_w - (int(self.maze.config.window_w * 0.2))),
                         5, 100, 100, colors.MLX_BLACK)
         if keycode == 65307:
             self.mlx.mlx_loop_exit(self.mlx_ptr)
