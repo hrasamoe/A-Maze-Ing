@@ -32,11 +32,10 @@ class Renderer:
         self.s: dict[str, Any] = {
                 't_last':  time.time(),
                 'elapsed': 0.0,
-                'angle':   0.0,
                 'count': 0,
                 'reveal_order': random.sample(range(total), total)
                 }
-        self.wall_color = colors.MLX_WHITE
+        self.wall_color = colors.WHITE
         self.toggle_solution = False
         self.pos_x, self.pos_y = self.maze.config.entry
         self.game_won = False
@@ -52,8 +51,7 @@ class Renderer:
         if self.game_won:
             return
 
-        x, y = self.pos_x, self.pos_y
-        cell: Cell = self.maze.grid[y][x]
+        cell: Cell = self.maze.grid[self.pos_y][self.pos_x]
         if dx == 1 and cell.has_wall(Cell.east):
             return
         if dx == -1 and cell.has_wall(Cell.west):
@@ -62,8 +60,8 @@ class Renderer:
             return
         if dy == 1 and cell.has_wall(Cell.south):
             return
-        new_x = x + dx
-        new_y = y + dy
+        new_x = self.pos_x + dx
+        new_y = self.pos_y + dy
         if not (0 <= new_x < self.maze.config.width):
             return
         if not (0 <= new_y < self.maze.config.height):
@@ -109,18 +107,18 @@ class Renderer:
         if self.game_won:
             cx = self.maze.config.window_w // 2 - 200
             cy = self.maze.config.window_h // 2
-            self.draw_rect(cx, cy, 300, 100, colors.MLX_YELLOW)
+            self.draw_rect(cx, cy, 300, 100, colors.YELLOW)
             self.flush()
             self.text(
                     cx + 13, cy + 30,
-                    colors.MLX_RED, "YOU WIN! [W]/[X] to replay")
+                    colors.RED, "YOU WIN! [W]/[X] to replay")
             return
 
     def render_mlx(
                 self,
                 player_pos: tuple[int, int] | None = None,
                 solution_mode: bool = False,
-                wall_color: int = colors.MLX_WHITE) -> None:
+                wall_color: int = colors.WHITE) -> None:
         now: float = time.time()
         dt: float = min(now - self.s['t_last'], 0.05)
         self.s['t_last'] = now
@@ -157,17 +155,17 @@ class Renderer:
                                 pulse << 16 | pulse << 8 | pulse)
                     continue
                 if (x, y) == (px, py):
-                    bg = colors.MLX_RED
+                    bg = colors.RED
                 elif (x, y) == self.maze.config.entry:
-                    bg = colors.MLX_YELLOW
+                    bg = colors.YELLOW
                 elif (x, y) == self.maze.config.exit:
-                    bg = colors.MLX_BLUE
+                    bg = colors.BLUE
                 elif (x, y) in solution:
-                    bg = colors.MLX_YELLOW
+                    bg = colors.YELLOW
                 elif cell.is_42:
-                    bg = colors.MLX_GREEN
+                    bg = colors.GREEN
                 else:
-                    bg = colors.MLX_BLACK
+                    bg = colors.BLACK
                 self._fill_rect(cx, cy, cell_w, cell_h, bg)
                 if cell.has_wall(Cell.north):
                     self._fill_rect(cx, cy, cell_w, wall_t, wall_color)
@@ -227,7 +225,7 @@ class Renderer:
         if keycode == 115:
             self.toggle_solution = not self.toggle_solution
         if keycode == 100:
-            palette = colors.MLX_COLOR_PALETTE
+            palette = colors.COLOR_PALETTE
             self.wall_color = palette[self.s['count'] % len(palette)]
             self.s['count'] += 1
         if keycode == 97:
@@ -244,7 +242,7 @@ class Renderer:
             self.play_mod = not self.play_mod
             self.draw_rect(
                         (self.maze.config.window_w - (int(self.maze.config.window_w * 0.2))),
-                        5, 100, 100, colors.MLX_BLACK)
+                        5, 100, 100, colors.BLACK)
         if keycode == 65307:
             self.mlx.mlx_loop_exit(self.mlx_ptr)
 
@@ -256,7 +254,7 @@ class Renderer:
             self.maze._embed_42_pattern()
             self.draw_new_maze()
             self.flush()
-            self.draw_menu(colors.MLX_WHITE)
+            self.draw_menu(colors.WHITE)
             self.mlx.mlx_loop_hook(self.mlx_ptr, self._loop, None)
             self.mlx.mlx_key_hook(self.win, self.on_key_pressed, None)
             self.mlx.mlx_hook(self.win, 33, 0, self.close, None)
