@@ -21,7 +21,7 @@ class MazeProperty(BaseModel):
 
 class MazeConfig:
     """
-        All operations related to data 
+        All operations related to data
         validation are described in config.txt:
         methods:
             - logic_check
@@ -101,7 +101,7 @@ class MazeConfig:
 
     def read_file(self, filepath: str) -> dict[str, Any]:
         """
-            Read the config.txt file, 
+            Read the config.txt file,
             storing all its data in a dictionary.
         """
         data: dict[str, Any] = {}

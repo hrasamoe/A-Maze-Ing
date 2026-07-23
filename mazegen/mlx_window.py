@@ -4,7 +4,6 @@ from mazegen.cell import Cell
 from mazegen.generator import MazeGenerator
 import random
 import time
-import math
 from typing import Any
 
 

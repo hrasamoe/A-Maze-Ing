@@ -36,10 +36,12 @@ class MazeGenerator:
 
     def _embed_42_pattern(self) -> None:
         """
-        Initialize each cell with the x, y coordinates of the exact position of each point in the 42 pattern. Test each point to see if the entry and exit points are not included.
+        Initialize each cell with the x, y coordinates
+        of the exact position of each point in the 42 pattern.
+        Test each point to see if the entry and exit points are not included.
         And set all cells to "visited".
         """
-        
+
         offset_x: int = (self.config.width - 7) // 2
         offset_y: int = (self.config.height - 5) // 2
 
@@ -67,7 +69,7 @@ class MazeGenerator:
         """
             Transform each wall into hexadecimal
         """
-        
+
         result: str = ""
         for y in range(self.config.height):
             for x in range(self.config.width):
@@ -79,7 +81,7 @@ class MazeGenerator:
         """
             Remove wall of an cell if wall closed is more than 3
         """
-        
+
         for y in range(self.config.height):
             for x in range(self.config.width):
                 cell = self.grid[y][x]
