@@ -5,12 +5,11 @@ import stat
 
 
 class MazeProperty(BaseModel):
-    width: int = Field(
-        ..., ge=18, le=36, description="Maze with between 18 and 36"
-    )
-    height: int = Field(
-        ..., ge=9, le=18, description="Maze height between 9 and 18"
-    )
+    """
+        Model used for data validation in config.txt
+    """
+    width: int = 0
+    height: int = 0
     entry: tuple[int, int]
     exit: tuple[int, int]
     output_file: str = Field(default="maze_output.txt", min_length=2)
@@ -21,6 +20,13 @@ class MazeProperty(BaseModel):
 
 
 class MazeConfig:
+    """
+        All operations related to data 
+        validation are described in config.txt:
+        methods:
+            - logic_check
+            - read_file
+    """
     def __init__(self, filepath: str) -> None:
         self.filepath: str = filepath
         raw_data = self.read_file(filepath)
@@ -94,6 +100,10 @@ class MazeConfig:
         self.seed = self.property.seed
 
     def read_file(self, filepath: str) -> dict[str, Any]:
+        """
+            Read the config.txt file, 
+            storing all its data in a dictionary.
+        """
         data: dict[str, Any] = {}
         try:
             if os.path.exists(filepath):
@@ -135,6 +145,10 @@ class MazeConfig:
             raise OSError(f"[ERROR PARSING FILE CONFIG]: {e}")
 
     def logic_chek(self,) -> None:
+        """
+            Check if the entry point and exit
+            point are within the maze and do not overlap
+        """
         if self.property.entry == self.property.exit:
             raise ValueError("Entry and Exit coordinates cannot be identical")
         x1, y1 = self.property.entry

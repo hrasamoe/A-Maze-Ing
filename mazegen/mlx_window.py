@@ -42,12 +42,21 @@ class Renderer:
         self.play_mod = False
 
     def put_pixel(self, x: int, y: int, color: int) -> None:
+        """
+            Color one pixel in the image stored in memory.
+        """
         if 0 <= x < self.maze.config.window_w and \
                 0 <= y < self.maze.config.window_h:
             off: int = y * self.sl + x * (self.bpp)
             self.data[off:off+self.bpp] = color.to_bytes(self.bpp, 'little')
 
     def _try_move(self, dx: int, dy: int) -> None:
+        """
+            Enable play mode in MLX.
+            Allows you to navigate the maze.
+            If the entry position approaches
+            the exit position, a message will be displayed.
+        """
         if self.game_won:
             return
 
@@ -74,6 +83,9 @@ class Renderer:
         self, x: int, y: int,
         rect_w: int, rect_h: int, color: int
     ) -> None:
+        """
+            Draw a rechangle using putpixel
+        """
         for row in range(y, y + rect_h):
             for col in range(x, x + rect_w):
                 self.put_pixel(col, row, color)
@@ -83,24 +95,40 @@ class Renderer:
                 w: int, h: int,
                 color: int
                 ) -> None:
+        """
+            draw a rectangle filled with color
+        """
         row_bytes = color.to_bytes(self.bpp, 'little') * w
         for dy in range(h):
             off = (y + dy) * self.sl + x * self.bpp
             self.data[off:off + w * self.bpp] = row_bytes
 
     def clear(self) -> None:
+        """
+        Erase all pixels in the window
+        """
         self.data[0:self.sl *
                   self.maze.config.window_w] = (
                       b'\x00' * (self.sl * self.maze.config.window_h))
 
     def text(self, x: int, y: int, color: int, s: str) -> None:
+        """
+           Displays text in the window
+        """
         self.mlx.mlx_string_put(self.mlx_ptr, self.win, x, y, color, s)
 
     def flush(self) -> None:
+        """
+            Displays the changes in the window
+        """
         self.mlx.mlx_put_image_to_window(
             self.mlx_ptr, self.win, self.img, 0, 0)
 
     def _loop(self, data: object) -> None:
+        """
+            Loops the rendering process to allow for
+            dynamic updates based on user interaction
+        """
         self.render_mlx(
                             player_pos=(self.pos_x, self.pos_y),
                             solution_mode=self.toggle_solution,
@@ -121,6 +149,12 @@ class Renderer:
                 player_pos: tuple[int, int] | None = None,
                 solution_mode: bool = False,
                 wall_color: int = colors.WHITE) -> None:
+        """
+            Displays the pixel size of each cell
+            in the mlx window with each wall.
+            Also handles animation: The cells
+            are displayed gradually and randomly.
+        """
         now: float = time.time()
         dt: float = min(now - self.s['t_last'], 0.05)
         self.s['t_last'] = now
@@ -150,11 +184,6 @@ class Renderer:
                 cx = x * cell_w
                 cy = y * cell_h
                 if (cell_index - 1) not in revealed_set:
-                    t = self.s['elapsed'] * 3 + cell_index * .1
-                    pulse = int(20 + 10 * abs(math.sin(t)))
-                    self._fill_rect(
-                                cx, cy, cell_w, cell_h,
-                                pulse << 16 | pulse << 8 | pulse)
                     continue
                 if (x, y) == (px, py):
                     bg = colors.RED
@@ -182,6 +211,9 @@ class Renderer:
                                     cy, wall_t, cell_h, wall_color)
 
     def draw_new_maze(self, algo: str = "BFS") -> None:
+        """
+            Generate the maze in the window
+        """
         self.clear()
         self.maze = MazeGenerator(self.config_path)
         if algo == "BFS":
@@ -199,6 +231,9 @@ class Renderer:
         self.game_won = False
 
     def draw_menu(self, color: int) -> None:
+        """
+            Draw the menu pixel by pixel
+        """
         pos_y = 5
         window_w = self.maze.config.window_w
         pos_x = window_w - (int(window_w * 0.2))
@@ -220,6 +255,10 @@ class Renderer:
         self.text(pos_x, pos_y + 140, color, menu_7)
 
     def on_key_pressed(self, keycode: int, param: object) -> None:
+        """
+            Manage user interaction
+            Test each key clicker before calling a method
+        """
         if keycode == 119:
             self.draw_new_maze("BFS")
         if keycode == 120:
@@ -251,9 +290,19 @@ class Renderer:
             self.mlx.mlx_loop_exit(self.mlx_ptr)
 
     def close(self, param: object) -> None:
+        """
+            Close the mlx window
+        """
         self.mlx.mlx_loop_exit(self.mlx_ptr), None
 
     def run(self) -> None:
+        """
+            Generates the 42 pattern and the maze,
+            as well as the menu.
+            Initializes interactions with the
+            menu using mlx_loop_hook and mlx_key_hook.
+            Repeats the render in a loop.
+        """
         try:
             self.maze._embed_42_pattern()
             self.draw_new_maze()
