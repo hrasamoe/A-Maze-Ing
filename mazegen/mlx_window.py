@@ -89,7 +89,9 @@ class Renderer:
             self.data[off:off + w * self.bpp] = row_bytes
 
     def clear(self) -> None:
-        self.data[0:self.sl * self.maze.config.window_w] = b'\x00' * (self.sl * self.maze.config.window_h)
+        self.data[0:self.sl *
+                  self.maze.config.window_w] = (
+                      b'\x00' * (self.sl * self.maze.config.window_h))
 
     def text(self, x: int, y: int, color: int, s: str) -> None:
         self.mlx.mlx_string_put(self.mlx_ptr, self.win, x, y, color, s)
@@ -241,7 +243,9 @@ class Renderer:
         if keycode == 112:
             self.play_mod = not self.play_mod
             self.draw_rect(
-                        (self.maze.config.window_w - (int(self.maze.config.window_w * 0.2))),
+                        (
+                            self.maze.config.window_w -
+                            (int(self.maze.config.window_w * 0.2))),
                         5, 100, 100, colors.BLACK)
         if keycode == 65307:
             self.mlx.mlx_loop_exit(self.mlx_ptr)
