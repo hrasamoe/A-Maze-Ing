@@ -36,7 +36,7 @@ class MazeConfig:
         except ValidationError as e:
             occured_error = []
             for err in e.errors():
-                field_name = str(err.get('loc')[0]).upper()
+                field_name = str(err.get('loc')).upper()
                 error_type = err.get("type")
                 if error_type == "missing":
                     occured_error.append(
