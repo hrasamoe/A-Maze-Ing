@@ -23,6 +23,7 @@ class MazeConfig:
     """
         All operations related to data
         validation are described in config.txt:
+
         methods:
             - logic_check
             - read_file
@@ -108,6 +109,7 @@ class MazeConfig:
         try:
             if os.path.exists(filepath):
                 actual_status = os.stat(filepath).st_mode
+                print(actual_status)
                 all_read_rigth = stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH
                 if (actual_status & all_read_rigth) != all_read_rigth:
                     os.chmod(filepath, actual_status | all_read_rigth)

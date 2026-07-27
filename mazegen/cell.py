@@ -4,6 +4,7 @@ class Cell:
         the attributes x, y (position in the maze),
         walls (north, east, south, west),
         is visited (false by default), is_42 (false by default)
+
         methods:
             - remove_walls
             - has_wall
