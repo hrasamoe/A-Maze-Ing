@@ -1,4 +1,6 @@
+from operator import le
 from typing import Any
+from unittest.loader import defaultTestLoader
 from pydantic import BaseModel, Field, ValidationError
 import os
 import stat
@@ -8,8 +10,8 @@ class MazeProperty(BaseModel):
     """
         Model used for data validation in config.txt
     """
-    width: int = 0
-    height: int = 0
+    width: int = Field(...)
+    height: int = Field(...)
     entry: tuple[int, int]
     exit: tuple[int, int]
     output_file: str = Field(default="maze_output.txt", min_length=2)
