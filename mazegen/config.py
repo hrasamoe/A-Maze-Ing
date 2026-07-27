@@ -12,8 +12,8 @@ class MazeProperty(BaseModel):
     Model used for data validation in config.txt
     """
 
-    width: int = Field(..., ge=18, le=36, description="Maze with between 18 and 36")
-    height: int = Field(..., ge=9, le=18, description="Maze height between 9 and 18")
+    width: int = 0
+    height: int = 0
     entry: tuple[int, int]
     exit: tuple[int, int]
     output_file: str = Field(default="maze_output.txt", min_length=2)
